@@ -82,8 +82,7 @@
     <FIELD NAME="enabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1"/>
     <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
    </FIELDS>
-   <KEYS><KEY NAME="primary" TYPE="primary" FIELDS="id"/><KEY NAME="coursefk" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/></KEYS>
-   <INDEXES><INDEX NAME="courseuniq" UNIQUE="true" FIELDS="courseid"/></INDEXES>
+   <KEYS><KEY NAME="primary" TYPE="primary" FIELDS="id"/><KEY NAME="coursefk" TYPE="foreign-unique" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/></KEYS>
   </TABLE>
   <TABLE NAME="local_rewardshop_unlocks" COMMENT="Entitlements granted by content unlock rewards">
    <FIELDS>
