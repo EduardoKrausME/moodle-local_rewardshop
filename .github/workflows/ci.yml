@@ -17,7 +17,9 @@ jobs:
           repository: EduardoKrausME/moodle-plugin-validate
           ref: master
           path: .moodle-plugin-validate
+      - name: Move validator outside plugin tree
+        run: mv .moodle-plugin-validate "$RUNNER_TEMP/moodle-plugin-validate"
       - name: PHP lint
-        run: find . -path './.moodle-plugin-validate' -prune -o -name '*.php' -print0 | xargs -0 -n1 php -l
+        run: find . -name '*.php' -print0 | xargs -0 -n1 php -l
       - name: Moodle plugin finishing validation
-        run: python3 .moodle-plugin-validate/.chatgpt/run.py --check "$GITHUB_WORKSPACE"
+        run: python3 "$RUNNER_TEMP/moodle-plugin-validate/.chatgpt/run.py" --check "$GITHUB_WORKSPACE"
