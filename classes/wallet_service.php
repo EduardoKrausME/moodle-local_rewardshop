@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - https://moodle.org/
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <https://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * classes/wallet_service.php for local_rewardshop.
@@ -24,9 +24,32 @@
 
 namespace local_rewardshop;
 use core\lock\lock_config;
+/**
+ * Class wallet_service.
+ */
 class wallet_service {
  private const TYPES=['earn','spend','refund','adjustment'];
+ /**
+  * Method get_balance.
+  *
+  * @param int $userid Parameter userid.
+  * @param int $courseid Parameter courseid.
+  * @return int Return value.
+  */
  public static function get_balance(int $userid,int $courseid): int { global $DB; return (int)$DB->get_field('local_rewardshop_wallet','balance',['userid'=>$userid,'courseid'=>$courseid]); }
+ /**
+  * Method change.
+  *
+  * @param int $userid Parameter userid.
+  * @param int $courseid Parameter courseid.
+  * @param int $amount Parameter amount.
+  * @param string $type Parameter type.
+  * @param string $reference Parameter reference.
+  * @param string $description Parameter description.
+  * @param ?int $relatedid Parameter relatedid.
+  * @param ?string $idempotencykey Parameter idempotencykey.
+  * @return int Return value.
+  */
  public static function change(int $userid,int $courseid,int $amount,string $type,string $reference,string $description='',?int $relatedid=null,?string $idempotencykey=null): int {
   global $DB; if ($userid<=0||$courseid<=0||$amount===0||!in_array($type,self::TYPES,true)) throw new \invalid_parameter_exception('Invalid wallet change');
   $ctx=\context_course::instance($courseid); $key=$idempotencykey ?: implode('|',[$userid,$courseid,$type,$reference,(string)$relatedid,$amount]); $hash=hash('sha256',$key);

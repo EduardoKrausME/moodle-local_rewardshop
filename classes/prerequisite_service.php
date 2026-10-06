@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - https://moodle.org/
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <https://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * classes/prerequisite_service.php for local_rewardshop.
@@ -23,7 +23,17 @@
  */
 
 namespace local_rewardshop;
+/**
+ * Class prerequisite_service.
+ */
 class prerequisite_service {
+ /**
+  * Method check.
+  *
+  * @param \stdClass $reward Parameter reward.
+  * @param int $userid Parameter userid.
+  * @return array Return value.
+  */
  public static function check(\stdClass $reward, int $userid): array {
   $errors=[]; $cfg=json_decode((string)$reward->configjson,true); if(!is_array($cfg)) return $errors;
   if(isset($cfg['minxp']) && (int)$cfg['minxp']>0) {

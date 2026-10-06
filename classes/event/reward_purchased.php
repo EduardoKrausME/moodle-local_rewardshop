@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - https://moodle.org/
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <https://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * classes/event/reward_purchased.php for local_rewardshop.
@@ -23,9 +23,32 @@
  */
 
 namespace local_rewardshop\event;
+/**
+ * Class reward_purchased.
+ */
 class reward_purchased extends \core\event\base {
+ /**
+  * Method init.
+  *
+  * @return mixed Return value.
+  */
  protected function init(){$this->data['contextlevel']=CONTEXT_COURSE;$this->data['crud']='c';$this->data['edulevel']=self::LEVEL_PARTICIPATING;}
+ /**
+  * Method get_name.
+  *
+  * @return mixed Return value.
+  */
  public static function get_name(){return get_string('event_reward_purchased','local_rewardshop');}
+ /**
+  * Method get_description.
+  *
+  * @return mixed Return value.
+  */
  public function get_description(){return 'Reward Purchased';}
+ /**
+  * Method get_url.
+  *
+  * @return mixed Return value.
+  */
  public function get_url(){return new \moodle_url('/local/rewardshop/my.php',['courseid'=>$this->courseid]);}
  }
