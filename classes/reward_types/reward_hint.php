@@ -27,39 +27,52 @@ namespace local_rewardshop\reward_types;
  * Class reward_hint.
  */
 class reward_hint extends base {
- /**
-  * Method get_name.
-  *
-  * @return string Return value.
-  */
- public function get_name(): string { return get_string('type_hint','local_rewardshop'); }
- /**
-  * Method get_description.
-  *
-  * @return string Return value.
-  */
- public function get_description(): string { return get_string('type_hint_desc','local_rewardshop'); }
- /**
-  * Method validate_configuration.
-  *
-  * @param array $config Parameter config.
-  * @param \stdClass $reward Parameter reward.
-  * @return array Return value.
-  */
- public function validate_configuration(array $config, \stdClass $reward): array { return trim((string)($config['hint']??''))==='' ? ['hint'=>get_string('errorhint','local_rewardshop')] : []; }
- /**
-  * Method supports_automatic_delivery.
-  *
-  * @return bool Return value.
-  */
- public function supports_automatic_delivery(): bool { return true; }
- /**
-  * Method deliver.
-  *
-  * @param \stdClass $purchase Parameter purchase.
-  * @param \stdClass $reward Parameter reward.
-  * @param int $userid Parameter userid.
-  * @return void Return value.
-  */
- public function deliver(\stdClass $purchase, \stdClass $reward, int $userid): void { /* Hint lives in immutable config snapshot and is shown in My purchases. */ }
+    /**
+     * Method get_name.
+     *
+     * @return string Return value.
+     */
+    public function get_name(): string {
+        return get_string('type_hint', 'local_rewardshop');
+    }
+
+    /**
+     * Method get_description.
+     *
+     * @return string Return value.
+     */
+    public function get_description(): string {
+        return get_string('type_hint_desc', 'local_rewardshop');
+    }
+
+    /**
+     * Method validate_configuration.
+     *
+     * @param array $config Parameter config.
+     * @param \stdClass $reward Parameter reward.
+     * @return array Return value.
+     */
+    public function validate_configuration(array $config, \stdClass $reward): array {
+        return trim((string)($config['hint'] ?? '')) === '' ? ['hint' => get_string('errorhint', 'local_rewardshop')] : [];
+    }
+
+    /**
+     * Method supports_automatic_delivery.
+     *
+     * @return bool Return value.
+     */
+    public function supports_automatic_delivery(): bool {
+        return true;
+    }
+
+    /**
+     * Method deliver.
+     *
+     * @param \stdClass $purchase Parameter purchase.
+     * @param \stdClass $reward Parameter reward.
+     * @param int $userid Parameter userid.
+     * @return void Return value.
+     */
+    public function deliver(\stdClass $purchase, \stdClass $reward, int $userid): void { /* Hint lives in immutable config snapshot and is shown in My purchases. */
+    }
 }

@@ -24,15 +24,28 @@
 
 defined('MOODLE_INTERNAL') || die;
 function local_rewardshop_extend_navigation_course($navigation, $course, $context) {
- if (!isloggedin() || isguestuser() || !has_capability('local/rewardshop:view', $context)) { return; }
- $navigation->add(get_string('pluginname','local_rewardshop'), new moodle_url('/local/rewardshop/index.php',['courseid'=>$course->id]), navigation_node::TYPE_CUSTOM, null, 'local_rewardshop');
+    if (!isloggedin() || isguestuser() || !has_capability('local/rewardshop:view', $context)) {
+        return;
+    }
+    $navigation->add(get_string('pluginname', 'local_rewardshop'), new moodle_url('/local/rewardshop/index.php', ['courseid' => $course->id]), navigation_node::TYPE_CUSTOM, null, 'local_rewardshop');
 }
-function local_rewardshop_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options=[]) {
- if ($context->contextlevel !== CONTEXT_COURSE || $filearea !== 'rewardimage') { return false; }
- require_login($course);
- if (!has_capability('local/rewardshop:view',$context)) { return false; }
- $itemid = array_shift($args); $filename = array_pop($args); $filepath = '/'.implode('/',$args).'/';
- $fs = get_file_storage(); $file = $fs->get_file($context->id,'local_rewardshop',$filearea,$itemid,$filepath,$filename);
- if (!$file || $file->is_directory()) { return false; }
- send_stored_file($file, 0, 0, $forcedownload, $options); return true;
+
+function local_rewardshop_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
+    if ($context->contextlevel !== CONTEXT_COURSE || $filearea !== 'rewardimage') {
+        return false;
+    }
+    require_login($course);
+    if (!has_capability('local/rewardshop:view', $context)) {
+        return false;
+    }
+    $itemid = array_shift($args);
+    $filename = array_pop($args);
+    $filepath = '/' . implode('/', $args) . '/';
+    $fs = get_file_storage();
+    $file = $fs->get_file($context->id, 'local_rewardshop', $filearea, $itemid, $filepath, $filename);
+    if (!$file || $file->is_directory()) {
+        return false;
+    }
+    send_stored_file($file, 0, 0, $forcedownload, $options);
+    return true;
 }

@@ -27,28 +27,41 @@ namespace local_rewardshop\event;
  * Class reward_refunded.
  */
 class reward_refunded extends \core\event\base {
- /**
-  * Method init.
-  *
-  * @return mixed Return value.
-  */
- protected function init(){$this->data['contextlevel']=CONTEXT_COURSE;$this->data['crud']='c';$this->data['edulevel']=self::LEVEL_PARTICIPATING;}
- /**
-  * Method get_name.
-  *
-  * @return mixed Return value.
-  */
- public static function get_name(){return get_string('event_reward_refunded','local_rewardshop');}
- /**
-  * Method get_description.
-  *
-  * @return mixed Return value.
-  */
- public function get_description(){return 'Reward Refunded';}
- /**
-  * Method get_url.
-  *
-  * @return mixed Return value.
-  */
- public function get_url(){return new \moodle_url('/local/rewardshop/my.php',['courseid'=>$this->courseid]);}
- }
+    /**
+     * Method init.
+     *
+     * @return mixed Return value.
+     */
+    protected function init() {
+        $this->data['contextlevel'] = CONTEXT_COURSE;
+        $this->data['crud'] = 'c';
+        $this->data['edulevel'] = self::LEVEL_PARTICIPATING;
+    }
+
+    /**
+     * Method get_name.
+     *
+     * @return mixed Return value.
+     */
+    public static function get_name() {
+        return get_string('event_reward_refunded', 'local_rewardshop');
+    }
+
+    /**
+     * Method get_description.
+     *
+     * @return mixed Return value.
+     */
+    public function get_description() {
+        return 'Reward Refunded';
+    }
+
+    /**
+     * Method get_url.
+     *
+     * @return mixed Return value.
+     */
+    public function get_url() {
+        return new \moodle_url('/local/rewardshop/my.php', ['courseid' => $this->courseid]);
+    }
+}

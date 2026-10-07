@@ -27,21 +27,33 @@ namespace local_rewardshop;
  * Class reward_type_registry.
  */
 class reward_type_registry {
- private const TYPES=['reward_badge','reward_contentunlock','reward_hint','reward_quizattempt','reward_extension','reward_custom'];
- /**
-  * Method get.
-  *
-  * @param string $type Parameter type.
-  * @return reward_type_interface Return value.
-  */
- public static function get(string $type): reward_type_interface {
-  if (!in_array($type,self::TYPES,true)) { throw new \invalid_parameter_exception('Unknown reward type'); }
-  $class='\\local_rewardshop\\reward_types\\'.$type; return new $class();
- }
- /**
-  * Method all.
-  *
-  * @return array Return value.
-  */
- public static function all(): array { $out=[]; foreach(self::TYPES as $t){$o=self::get($t);$out[$t]=$o->get_name();} return $out; }
+    private const TYPES = ['reward_badge', 'reward_contentunlock', 'reward_hint', 'reward_quizattempt', 'reward_extension', 'reward_custom'];
+
+    /**
+     * Method get.
+     *
+     * @param string $type Parameter type.
+     * @return reward_type_interface Return value.
+     */
+    public static function get(string $type): reward_type_interface {
+        if (!in_array($type, self::TYPES, true)) {
+            throw new \invalid_parameter_exception('Unknown reward type');
+        }
+        $class = '\\local_rewardshop\\reward_types\\' . $type;
+        return new $class();
+    }
+
+    /**
+     * Method all.
+     *
+     * @return array Return value.
+     */
+    public static function all(): array {
+        $out = [];
+        foreach (self::TYPES as $t) {
+            $o = self::get($t);
+            $out[$t] = $o->get_name();
+        }
+        return $out;
+    }
 }

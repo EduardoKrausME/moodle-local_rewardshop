@@ -23,57 +23,75 @@
  */
 
 namespace local_rewardshop\reward_types;
+
 use local_rewardshop\reward_type_interface;
+
 /**
  * Class base.
  */
 abstract class base implements reward_type_interface {
- /**
-  * Method get_description.
-  *
-  * @return string Return value.
-  */
- public function get_description(): string { return ''; }
- /**
-  * Method validate_configuration.
-  *
-  * @param array $config Parameter config.
-  * @param \stdClass $reward Parameter reward.
-  * @return array Return value.
-  */
- public function validate_configuration(array $config, \stdClass $reward): array { return []; }
- /**
-  * Method can_purchase.
-  *
-  * @param \stdClass $reward Parameter reward.
-  * @param int $userid Parameter userid.
-  * @param \context_course $context Parameter context.
-  * @return array Return value.
-  */
- public function can_purchase(\stdClass $reward, int $userid, \context_course $context): array { return []; }
- /**
-  * Method purchase.
-  *
-  * @param \stdClass $purchase Parameter purchase.
-  * @param \stdClass $reward Parameter reward.
-  * @param int $userid Parameter userid.
-  * @return void Return value.
-  */
- public function purchase(\stdClass $purchase, \stdClass $reward, int $userid): void {}
- /**
-  * Method cancel.
-  *
-  * @param \stdClass $purchase Parameter purchase.
-  * @param \stdClass $reward Parameter reward.
-  * @param int $userid Parameter userid.
-  * @return void Return value.
-  */
- public function cancel(\stdClass $purchase, \stdClass $reward, int $userid): void {}
- /**
-  * Method config.
-  *
-  * @param \stdClass $reward Parameter reward.
-  * @return array Return value.
-  */
- protected function config(\stdClass $reward): array { $v=json_decode((string)($reward->configjson??''),true); return is_array($v)?$v:[]; }
+    /**
+     * Method get_description.
+     *
+     * @return string Return value.
+     */
+    public function get_description(): string {
+        return '';
+    }
+
+    /**
+     * Method validate_configuration.
+     *
+     * @param array $config Parameter config.
+     * @param \stdClass $reward Parameter reward.
+     * @return array Return value.
+     */
+    public function validate_configuration(array $config, \stdClass $reward): array {
+        return [];
+    }
+
+    /**
+     * Method can_purchase.
+     *
+     * @param \stdClass $reward Parameter reward.
+     * @param int $userid Parameter userid.
+     * @param \context_course $context Parameter context.
+     * @return array Return value.
+     */
+    public function can_purchase(\stdClass $reward, int $userid, \context_course $context): array {
+        return [];
+    }
+
+    /**
+     * Method purchase.
+     *
+     * @param \stdClass $purchase Parameter purchase.
+     * @param \stdClass $reward Parameter reward.
+     * @param int $userid Parameter userid.
+     * @return void Return value.
+     */
+    public function purchase(\stdClass $purchase, \stdClass $reward, int $userid): void {
+    }
+
+    /**
+     * Method cancel.
+     *
+     * @param \stdClass $purchase Parameter purchase.
+     * @param \stdClass $reward Parameter reward.
+     * @param int $userid Parameter userid.
+     * @return void Return value.
+     */
+    public function cancel(\stdClass $purchase, \stdClass $reward, int $userid): void {
+    }
+
+    /**
+     * Method config.
+     *
+     * @param \stdClass $reward Parameter reward.
+     * @return array Return value.
+     */
+    protected function config(\stdClass $reward): array {
+        $v = json_decode((string)($reward->configjson ?? ''), true);
+        return is_array($v) ? $v : [];
+    }
 }

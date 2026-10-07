@@ -21,4 +21,18 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define([], function() { return { init: function() { document.querySelectorAll('.reward-buy').forEach(function(form) { form.addEventListener('submit', function() { var b=form.querySelector('button[type="submit"]'); if (b) { b.disabled=true; b.setAttribute('aria-disabled','true'); } }); }); } }; });
+define([], function () {
+    return {
+        init: function () {
+            document.querySelectorAll('.reward-buy').forEach(function (form) {
+                form.addEventListener('submit', function () {
+                    var b = form.querySelector('button[type="submit"]');
+                    if (b) {
+                        b.disabled = true;
+                        b.setAttribute('aria-disabled', 'true');
+                    }
+                });
+            });
+        }
+    };
+});

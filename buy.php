@@ -22,5 +22,18 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(__DIR__.'/../../config.php');require_sesskey();$rewardid=required_param('rewardid',PARAM_INT);$token=required_param('token',PARAM_ALPHANUMEXT);$reward=$DB->get_record('local_rewardshop_rewards',['id'=>$rewardid],'*',MUST_EXIST);$course=get_course($reward->courseid);require_login($course);$context=context_course::instance($course->id);require_capability('local/rewardshop:view',$context);
-try{\local_rewardshop\api::purchase_reward($rewardid,$USER->id,$token);redirect(new moodle_url('/local/rewardshop/my.php',['courseid'=>$course->id]),get_string('purchasesuccess','local_rewardshop'));}catch(Throwable $e){redirect(new moodle_url('/local/rewardshop/index.php',['courseid'=>$course->id]),$e->getMessage(),null,\core\output\notification::NOTIFY_ERROR);}
+require_once(__DIR__ . '/../../config.php');
+require_sesskey();
+$rewardid = required_param('rewardid', PARAM_INT);
+$token = required_param('token', PARAM_ALPHANUMEXT);
+$reward = $DB->get_record('local_rewardshop_rewards', ['id' => $rewardid], '*', MUST_EXIST);
+$course = get_course($reward->courseid);
+require_login($course);
+$context = context_course::instance($course->id);
+require_capability('local/rewardshop:view', $context);
+try {
+    \local_rewardshop\api::purchase_reward($rewardid, $USER->id, $token);
+    redirect(new moodle_url('/local/rewardshop/my.php', ['courseid' => $course->id]), get_string('purchasesuccess', 'local_rewardshop'));
+} catch (Throwable $e) {
+    redirect(new moodle_url('/local/rewardshop/index.php', ['courseid' => $course->id]), $e->getMessage(), null, \core\output\notification::NOTIFY_ERROR);
+}

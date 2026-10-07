@@ -25,22 +25,50 @@
 namespace local_rewardshop;
 /** @covers \local_rewardshop\api */
 final class api_test extends \advanced_testcase {
- /**
-  * Method test_wallet_and_idempotency.
-  *
-  * @return void Return value.
-  */
- public function test_wallet_and_idempotency(): void {$this->resetAfterTest();$c=$this->getDataGenerator()->create_course();$u=$this->getDataGenerator()->create_user();$this->assertSame(100,api::add_credits($u->id,$c->id,100,'test','',null,'earn-1'));$this->assertSame(100,api::add_credits($u->id,$c->id,100,'test','',null,'earn-1'));$this->assertSame(60,api::spend_credits($u->id,$c->id,40,'test','',null,'spend-1'));$this->assertSame(60,api::get_balance($u->id,$c->id));global $DB;$this->assertCount(2,$DB->get_records('local_rewardshop_ledger',['userid'=>$u->id,'courseid'=>$c->id]));}
- /**
-  * Method test_insufficient_balance.
-  *
-  * @return void Return value.
-  */
- public function test_insufficient_balance(): void {$this->resetAfterTest();$c=$this->getDataGenerator()->create_course();$u=$this->getDataGenerator()->create_user();$this->expectException(\moodle_exception::class);api::spend_credits($u->id,$c->id,1,'test','','','spend-no-balance');}
- /**
-  * Method test_refund_is_new_ledger_row.
-  *
-  * @return void Return value.
-  */
- public function test_refund_is_new_ledger_row(): void {$this->resetAfterTest();$c=$this->getDataGenerator()->create_course();$u=$this->getDataGenerator()->create_user();api::add_credits($u->id,$c->id,50,'earn','','','e');api::spend_credits($u->id,$c->id,30,'spend','','','s');api::refund($u->id,$c->id,30,'refund','','','r');global $DB;$this->assertSame(50,api::get_balance($u->id,$c->id));$this->assertCount(3,$DB->get_records('local_rewardshop_ledger',['userid'=>$u->id]));}
+    /**
+     * Method test_wallet_and_idempotency.
+     *
+     * @return void Return value.
+     */
+    public function test_wallet_and_idempotency(): void {
+        $this->resetAfterTest();
+        $c = $this->getDataGenerator()->create_course();
+        $u = $this->getDataGenerator()->create_user();
+        $this->assertSame(100, api::add_credits($u->id, $c->id, 100, 'test', '', null, 'earn-1'));
+        $this->assertSame(100, api::add_credits($u->id, $c->id, 100, 'test', '', null, 'earn-1'));
+        $this->assertSame(60, api::spend_credits($u->id, $c->id, 40, 'test', '', null, 'spend-1'));
+        $this->assertSame(60, api::get_balance($u->id, $c->id));
+        global $DB;
+        $this->assertCount(2, $DB->get_records('local_rewardshop_ledger', ['userid' => $u->id, 'courseid' => $c->id]));
+    }
+
+    /**
+     * Method test_insufficient_balance.
+     *
+     * @return void Return value.
+     */
+    public function test_insufficient_balance(): void {
+        $this->resetAfterTest();
+        $c = $this->getDataGenerator()->create_course();
+        $u = $this->getDataGenerator()->create_user();
+        $this->expectException(\moodle_exception::class);
+        api::spend_credits($u->id, $c->id, 1, 'test', '', '', 'spend-no-balance');
+    }
+
+    /**
+     * Method test_refund_is_new_ledger_row.
+     *
+     * @return void Return value.
+     */
+    public function test_refund_is_new_ledger_row(): void {
+        $this->resetAfterTest();
+        $c = $this->getDataGenerator()->create_course();
+        $u = $this->getDataGenerator()->create_user();
+        api::add_credits($u->id, $c->id, 50, 'earn', '', '', 'e');
+        api::spend_credits($u->id, $c->id, 30, 'spend', '', '', 's');
+        api::refund($u->id, $c->id, 30, 'refund', '', '', 'r');
+        global $DB;
+        $this->assertSame(50, api::get_balance($u->id, $c->id));
+        $this->assertCount(3, $DB->get_records('local_rewardshop_ledger', ['userid' => $u->id]));
+    }
 }

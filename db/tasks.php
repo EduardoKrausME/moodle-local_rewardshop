@@ -24,9 +24,9 @@
 
 defined('MOODLE_INTERNAL') || die;
 $tasks = [[
- 'classname' => '\\local_rewardshop\\task\\sync_personalxp',
- 'blocking' => 0,
- 'minute' => '*/15',
- 'hour' => '8-18',
- 'day' => '*', 'month' => '*', 'dayofweek' => '*',
+    'classname' => '\\local_rewardshop\\task\\sync_personalxp',
+    'blocking' => 0,
+    'minute' => '*/15',
+    'hour' => '8-18',
+    'day' => '*', 'month' => '*', 'dayofweek' => '*',
 ]];

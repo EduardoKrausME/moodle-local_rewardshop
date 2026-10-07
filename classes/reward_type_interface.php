@@ -27,66 +27,73 @@ namespace local_rewardshop;
  * Interface reward_type_interface.
  */
 interface reward_type_interface {
- /**
-  * Method get_name.
-  *
-  * @return string Return value.
-  */
- public function get_name(): string;
- /**
-  * Method get_description.
-  *
-  * @return string Return value.
-  */
- public function get_description(): string;
- /**
-  * Method validate_configuration.
-  *
-  * @param array $config Parameter config.
-  * @param \stdClass $reward Parameter reward.
-  * @return array Return value.
-  */
- public function validate_configuration(array $config, \stdClass $reward): array;
- /**
-  * Method can_purchase.
-  *
-  * @param \stdClass $reward Parameter reward.
-  * @param int $userid Parameter userid.
-  * @param \context_course $context Parameter context.
-  * @return array Return value.
-  */
- public function can_purchase(\stdClass $reward, int $userid, \context_course $context): array;
- /**
-  * Method purchase.
-  *
-  * @param \stdClass $purchase Parameter purchase.
-  * @param \stdClass $reward Parameter reward.
-  * @param int $userid Parameter userid.
-  * @return void Return value.
-  */
- public function purchase(\stdClass $purchase, \stdClass $reward, int $userid): void;
- /**
-  * Method deliver.
-  *
-  * @param \stdClass $purchase Parameter purchase.
-  * @param \stdClass $reward Parameter reward.
-  * @param int $userid Parameter userid.
-  * @return void Return value.
-  */
- public function deliver(\stdClass $purchase, \stdClass $reward, int $userid): void;
- /**
-  * Method cancel.
-  *
-  * @param \stdClass $purchase Parameter purchase.
-  * @param \stdClass $reward Parameter reward.
-  * @param int $userid Parameter userid.
-  * @return void Return value.
-  */
- public function cancel(\stdClass $purchase, \stdClass $reward, int $userid): void;
- /**
-  * Method supports_automatic_delivery.
-  *
-  * @return bool Return value.
-  */
- public function supports_automatic_delivery(): bool;
+    /**
+     * Method get_name.
+     *
+     * @return string Return value.
+     */
+    public function get_name(): string;
+
+    /**
+     * Method get_description.
+     *
+     * @return string Return value.
+     */
+    public function get_description(): string;
+
+    /**
+     * Method validate_configuration.
+     *
+     * @param array $config Parameter config.
+     * @param \stdClass $reward Parameter reward.
+     * @return array Return value.
+     */
+    public function validate_configuration(array $config, \stdClass $reward): array;
+
+    /**
+     * Method can_purchase.
+     *
+     * @param \stdClass $reward Parameter reward.
+     * @param int $userid Parameter userid.
+     * @param \context_course $context Parameter context.
+     * @return array Return value.
+     */
+    public function can_purchase(\stdClass $reward, int $userid, \context_course $context): array;
+
+    /**
+     * Method purchase.
+     *
+     * @param \stdClass $purchase Parameter purchase.
+     * @param \stdClass $reward Parameter reward.
+     * @param int $userid Parameter userid.
+     * @return void Return value.
+     */
+    public function purchase(\stdClass $purchase, \stdClass $reward, int $userid): void;
+
+    /**
+     * Method deliver.
+     *
+     * @param \stdClass $purchase Parameter purchase.
+     * @param \stdClass $reward Parameter reward.
+     * @param int $userid Parameter userid.
+     * @return void Return value.
+     */
+    public function deliver(\stdClass $purchase, \stdClass $reward, int $userid): void;
+
+    /**
+     * Method cancel.
+     *
+     * @param \stdClass $purchase Parameter purchase.
+     * @param \stdClass $reward Parameter reward.
+     * @param int $userid Parameter userid.
+     * @return void Return value.
+     */
+    public function cancel(\stdClass $purchase, \stdClass $reward, int $userid): void;
+
+    /**
+     * Method supports_automatic_delivery.
+     *
+     * @return bool Return value.
+     */
+    public function supports_automatic_delivery(): bool;
 }

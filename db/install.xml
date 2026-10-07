@@ -1,101 +1,139 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <XMLDB PATH="local/rewardshop/db" VERSION="20261003" COMMENT="Reward Shop tables"
- xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
- <TABLES>
-  <TABLE NAME="local_rewardshop_wallet" COMMENT="Current credit wallet per user and course">
-   <FIELDS>
-    <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-    <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
-    <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true"/>
-    <FIELD NAME="balance" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
-    <FIELD NAME="lifetimeearned" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
-    <FIELD NAME="lifetimespent" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
-    <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
-   </FIELDS>
-   <KEYS><KEY NAME="primary" TYPE="primary" FIELDS="id"/><KEY NAME="userfk" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/><KEY NAME="coursefk" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/></KEYS>
-   <INDEXES><INDEX NAME="usercourseuniq" UNIQUE="true" FIELDS="userid,courseid"/></INDEXES>
-  </TABLE>
-  <TABLE NAME="local_rewardshop_ledger" COMMENT="Immutable credit ledger">
-   <FIELDS>
-    <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-    <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
-    <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true"/>
-    <FIELD NAME="amount" TYPE="int" LENGTH="10" NOTNULL="true"/>
-    <FIELD NAME="type" TYPE="char" LENGTH="16" NOTNULL="true"/>
-    <FIELD NAME="reference" TYPE="char" LENGTH="100" NOTNULL="true"/>
-    <FIELD NAME="relatedid" TYPE="int" LENGTH="10" NOTNULL="false"/>
-    <FIELD NAME="balanceafter" TYPE="int" LENGTH="10" NOTNULL="true"/>
-    <FIELD NAME="description" TYPE="text" NOTNULL="false"/>
-    <FIELD NAME="uniquehash" TYPE="char" LENGTH="64" NOTNULL="true"/>
-    <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
-   </FIELDS>
-   <KEYS><KEY NAME="primary" TYPE="primary" FIELDS="id"/><KEY NAME="userfk" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/><KEY NAME="coursefk" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/></KEYS>
-   <INDEXES><INDEX NAME="uniquehashuniq" UNIQUE="true" FIELDS="uniquehash"/><INDEX NAME="usercoursetimeidx" UNIQUE="false" FIELDS="userid,courseid,timecreated"/></INDEXES>
-  </TABLE>
-  <TABLE NAME="local_rewardshop_rewards" COMMENT="Configured course rewards">
-   <FIELDS>
-    <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-    <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true"/>
-    <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true"/>
-    <FIELD NAME="description" TYPE="text" NOTNULL="false"/>
-    <FIELD NAME="descriptionformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="1"/>
-    <FIELD NAME="rewardtype" TYPE="char" LENGTH="64" NOTNULL="true"/>
-    <FIELD NAME="cost" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
-    <FIELD NAME="stock" TYPE="int" LENGTH="10" NOTNULL="false"/>
-    <FIELD NAME="maxperuser" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1"/>
-    <FIELD NAME="enabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1"/>
-    <FIELD NAME="timestart" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
-    <FIELD NAME="timeend" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
-    <FIELD NAME="requiresapproval" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
-    <FIELD NAME="configjson" TYPE="text" NOTNULL="false"/>
-    <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
-    <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
-    <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
-   </FIELDS>
-   <KEYS><KEY NAME="primary" TYPE="primary" FIELDS="id"/><KEY NAME="coursefk" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/></KEYS>
-   <INDEXES><INDEX NAME="courseenabledidx" UNIQUE="false" FIELDS="courseid,enabled,sortorder"/></INDEXES>
-  </TABLE>
-  <TABLE NAME="local_rewardshop_purchases" COMMENT="Reward purchases and approval lifecycle">
-   <FIELDS>
-    <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-    <FIELD NAME="rewardid" TYPE="int" LENGTH="10" NOTNULL="true"/>
-    <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
-    <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true"/>
-    <FIELD NAME="cost" TYPE="int" LENGTH="10" NOTNULL="true"/>
-    <FIELD NAME="status" TYPE="char" LENGTH="16" NOTNULL="true"/>
-    <FIELD NAME="requesttoken" TYPE="char" LENGTH="64" NOTNULL="true"/>
-    <FIELD NAME="configsnapshot" TYPE="text" NOTNULL="false"/>
-    <FIELD NAME="approvedby" TYPE="int" LENGTH="10" NOTNULL="false"/>
-    <FIELD NAME="timeapproved" TYPE="int" LENGTH="10" NOTNULL="false"/>
-    <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
-    <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
-   </FIELDS>
-   <KEYS><KEY NAME="primary" TYPE="primary" FIELDS="id"/><KEY NAME="rewardfk" TYPE="foreign" FIELDS="rewardid" REFTABLE="local_rewardshop_rewards" REFFIELDS="id"/><KEY NAME="userfk" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/><KEY NAME="coursefk" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/></KEYS>
-   <INDEXES><INDEX NAME="requestuniq" UNIQUE="true" FIELDS="userid,requesttoken"/><INDEX NAME="rewarduseridx" UNIQUE="false" FIELDS="rewardid,userid,status"/></INDEXES>
-  </TABLE>
-  <TABLE NAME="local_rewardshop_rules" COMMENT="XP to credit conversion rules per course">
-   <FIELDS>
-    <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-    <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true"/>
-    <FIELD NAME="xpstep" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="500"/>
-    <FIELD NAME="credits" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="50"/>
-    <FIELD NAME="enabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1"/>
-    <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
-   </FIELDS>
-   <KEYS><KEY NAME="primary" TYPE="primary" FIELDS="id"/><KEY NAME="coursefk" TYPE="foreign-unique" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/></KEYS>
-  </TABLE>
-  <TABLE NAME="local_rewardshop_unlocks" COMMENT="Entitlements granted by content unlock rewards">
-   <FIELDS>
-    <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-    <FIELD NAME="purchaseid" TYPE="int" LENGTH="10" NOTNULL="true"/>
-    <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
-    <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true"/>
-    <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="true"/>
-    <FIELD NAME="timeexpires" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
-    <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
-   </FIELDS>
-   <KEYS><KEY NAME="primary" TYPE="primary" FIELDS="id"/><KEY NAME="purchasefk" TYPE="foreign" FIELDS="purchaseid" REFTABLE="local_rewardshop_purchases" REFFIELDS="id"/><KEY NAME="userfk" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/></KEYS>
-   <INDEXES><INDEX NAME="usercmidx" UNIQUE="false" FIELDS="userid,cmid,timeexpires"/></INDEXES>
-  </TABLE>
- </TABLES>
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+    <TABLES>
+        <TABLE NAME="local_rewardshop_wallet" COMMENT="Current credit wallet per user and course">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="balance" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="lifetimeearned" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="lifetimespent" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="userfk" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+                <KEY NAME="coursefk" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="usercourseuniq" UNIQUE="true" FIELDS="userid,courseid"/>
+            </INDEXES>
+        </TABLE>
+        <TABLE NAME="local_rewardshop_ledger" COMMENT="Immutable credit ledger">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="amount" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="type" TYPE="char" LENGTH="16" NOTNULL="true"/>
+                <FIELD NAME="reference" TYPE="char" LENGTH="100" NOTNULL="true"/>
+                <FIELD NAME="relatedid" TYPE="int" LENGTH="10" NOTNULL="false"/>
+                <FIELD NAME="balanceafter" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="description" TYPE="text" NOTNULL="false"/>
+                <FIELD NAME="uniquehash" TYPE="char" LENGTH="64" NOTNULL="true"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="userfk" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+                <KEY NAME="coursefk" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="uniquehashuniq" UNIQUE="true" FIELDS="uniquehash"/>
+                <INDEX NAME="usercoursetimeidx" UNIQUE="false" FIELDS="userid,courseid,timecreated"/>
+            </INDEXES>
+        </TABLE>
+        <TABLE NAME="local_rewardshop_rewards" COMMENT="Configured course rewards">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true"/>
+                <FIELD NAME="description" TYPE="text" NOTNULL="false"/>
+                <FIELD NAME="descriptionformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="1"/>
+                <FIELD NAME="rewardtype" TYPE="char" LENGTH="64" NOTNULL="true"/>
+                <FIELD NAME="cost" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="stock" TYPE="int" LENGTH="10" NOTNULL="false"/>
+                <FIELD NAME="maxperuser" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1"/>
+                <FIELD NAME="enabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1"/>
+                <FIELD NAME="timestart" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="timeend" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="requiresapproval" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="configjson" TYPE="text" NOTNULL="false"/>
+                <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="coursefk" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="courseenabledidx" UNIQUE="false" FIELDS="courseid,enabled,sortorder"/>
+            </INDEXES>
+        </TABLE>
+        <TABLE NAME="local_rewardshop_purchases" COMMENT="Reward purchases and approval lifecycle">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="rewardid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="cost" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="status" TYPE="char" LENGTH="16" NOTNULL="true"/>
+                <FIELD NAME="requesttoken" TYPE="char" LENGTH="64" NOTNULL="true"/>
+                <FIELD NAME="configsnapshot" TYPE="text" NOTNULL="false"/>
+                <FIELD NAME="approvedby" TYPE="int" LENGTH="10" NOTNULL="false"/>
+                <FIELD NAME="timeapproved" TYPE="int" LENGTH="10" NOTNULL="false"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="rewardfk" TYPE="foreign" FIELDS="rewardid" REFTABLE="local_rewardshop_rewards"
+                     REFFIELDS="id"/>
+                <KEY NAME="userfk" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+                <KEY NAME="coursefk" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="requestuniq" UNIQUE="true" FIELDS="userid,requesttoken"/>
+                <INDEX NAME="rewarduseridx" UNIQUE="false" FIELDS="rewardid,userid,status"/>
+            </INDEXES>
+        </TABLE>
+        <TABLE NAME="local_rewardshop_rules" COMMENT="XP to credit conversion rules per course">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="xpstep" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="500"/>
+                <FIELD NAME="credits" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="50"/>
+                <FIELD NAME="enabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="coursefk" TYPE="foreign-unique" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+            </KEYS>
+        </TABLE>
+        <TABLE NAME="local_rewardshop_unlocks" COMMENT="Entitlements granted by content unlock rewards">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="purchaseid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="timeexpires" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="purchasefk" TYPE="foreign" FIELDS="purchaseid" REFTABLE="local_rewardshop_purchases"
+                     REFFIELDS="id"/>
+                <KEY NAME="userfk" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="usercmidx" UNIQUE="false" FIELDS="userid,cmid,timeexpires"/>
+            </INDEXES>
+        </TABLE>
+    </TABLES>
 </XMLDB>

@@ -27,22 +27,39 @@ namespace local_rewardshop;
  * Class prerequisite_service.
  */
 class prerequisite_service {
- /**
-  * Method check.
-  *
-  * @param \stdClass $reward Parameter reward.
-  * @param int $userid Parameter userid.
-  * @return array Return value.
-  */
- public static function check(\stdClass $reward, int $userid): array {
-  $errors=[]; $cfg=json_decode((string)$reward->configjson,true); if(!is_array($cfg)) return $errors;
-  if(isset($cfg['minxp']) && (int)$cfg['minxp']>0) {
-   $xp=0; if(class_exists('\\local_personalxp\\service\\xp_manager')){$c='\\local_personalxp\\service\\xp_manager';$xp=(int)$c::get_total($userid,(int)$reward->courseid);} if($xp<(int)$cfg['minxp'])$errors[]=get_string('prereqminxp','local_rewardshop',(int)$cfg['minxp']);
-  }
-  if(!empty($cfg['requiredcmids']) && is_array($cfg['requiredcmids'])) {
-   $completion=new \completion_info(get_course($reward->courseid));
-   foreach($cfg['requiredcmids'] as $cmid){try{$cm=get_coursemodule_from_id('',(int)$cmid,$reward->courseid,false,MUST_EXIST);$data=$completion->get_data($cm,false,$userid);if(!in_array((int)$data->completionstate,[COMPLETION_COMPLETE,COMPLETION_COMPLETE_PASS],true)){$errors[]=get_string('prereqcompletion','local_rewardshop',$cm->name);}}catch(\Throwable $e){$errors[]=get_string('invalidtarget','local_rewardshop');}}
-  }
-  return $errors;
- }
+    /**
+     * Method check.
+     *
+     * @param \stdClass $reward Parameter reward.
+     * @param int $userid Parameter userid.
+     * @return array Return value.
+     */
+    public static function check(\stdClass $reward, int $userid): array {
+        $errors = [];
+        $cfg = json_decode((string)$reward->configjson, true);
+        if (!is_array($cfg)) return $errors;
+        if (isset($cfg['minxp']) && (int)$cfg['minxp'] > 0) {
+            $xp = 0;
+            if (class_exists('\\local_personalxp\\service\\xp_manager')) {
+                $c = '\\local_personalxp\\service\\xp_manager';
+                $xp = (int)$c::get_total($userid, (int)$reward->courseid);
+            }
+            if ($xp < (int)$cfg['minxp']) $errors[] = get_string('prereqminxp', 'local_rewardshop', (int)$cfg['minxp']);
+        }
+        if (!empty($cfg['requiredcmids']) && is_array($cfg['requiredcmids'])) {
+            $completion = new \completion_info(get_course($reward->courseid));
+            foreach ($cfg['requiredcmids'] as $cmid) {
+                try {
+                    $cm = get_coursemodule_from_id('', (int)$cmid, $reward->courseid, false, MUST_EXIST);
+                    $data = $completion->get_data($cm, false, $userid);
+                    if (!in_array((int)$data->completionstate, [COMPLETION_COMPLETE, COMPLETION_COMPLETE_PASS], true)) {
+                        $errors[] = get_string('prereqcompletion', 'local_rewardshop', $cm->name);
+                    }
+                } catch (\Throwable $e) {
+                    $errors[] = get_string('invalidtarget', 'local_rewardshop');
+                }
+            }
+        }
+        return $errors;
+    }
 }

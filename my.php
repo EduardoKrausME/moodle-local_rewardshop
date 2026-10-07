@@ -22,6 +22,28 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(__DIR__.'/../../config.php');$courseid=required_param('courseid',PARAM_INT);$course=get_course($courseid);require_login($course);$context=context_course::instance($courseid);require_capability('local/rewardshop:view',$context);$PAGE->set_url('/local/rewardshop/my.php',['courseid'=>$courseid]);$PAGE->set_context($context);$PAGE->set_title(get_string('myhistory','local_rewardshop'));$PAGE->set_heading($course->fullname);
-$ledger=$DB->get_records('local_rewardshop_ledger',['userid'=>$USER->id,'courseid'=>$courseid],'timecreated DESC','*',0,100);$purchases=$DB->get_records('local_rewardshop_purchases',['userid'=>$USER->id,'courseid'=>$courseid],'timecreated DESC','*',0,100);$rows=[];foreach($ledger as $l)$rows[]=['date'=>userdate($l->timecreated),'description'=>s($l->description?:$l->reference),'amount'=>$l->amount,'balance'=>$l->balanceafter,'positive'=>$l->amount>0];$ps=[];foreach($purchases as $p){$r=$DB->get_record('local_rewardshop_rewards',['id'=>$p->rewardid]);$snap=json_decode((string)$p->configsnapshot,true)?:[];$hint='';if(($snap['rewardtype']??'')==='reward_hint'&&in_array($p->status,['approved','delivered'],true))$hint=clean_text((string)($snap['config']['hint']??''));$ps[]=['date'=>userdate($p->timecreated),'name'=>format_string($r->name??($snap['name']??'')),'cost'=>$p->cost,'status'=>get_string('status_'.$p->status,'local_rewardshop'),'hint'=>$hint];}
-echo $OUTPUT->header();echo $OUTPUT->render_from_template('local_rewardshop/my',['balance'=>\local_rewardshop\api::get_balance($USER->id,$courseid),'ledger'=>$rows,'purchases'=>$ps,'shopurl'=>(new moodle_url('/local/rewardshop/index.php',['courseid'=>$courseid]))->out(false)]);echo $OUTPUT->footer();
+require_once(__DIR__ . '/../../config.php');
+$courseid = required_param('courseid', PARAM_INT);
+$course = get_course($courseid);
+require_login($course);
+$context = context_course::instance($courseid);
+require_capability('local/rewardshop:view', $context);
+$PAGE->set_url('/local/rewardshop/my.php', ['courseid' => $courseid]);
+$PAGE->set_context($context);
+$PAGE->set_title(get_string('myhistory', 'local_rewardshop'));
+$PAGE->set_heading($course->fullname);
+$ledger = $DB->get_records('local_rewardshop_ledger', ['userid' => $USER->id, 'courseid' => $courseid], 'timecreated DESC', '*', 0, 100);
+$purchases = $DB->get_records('local_rewardshop_purchases', ['userid' => $USER->id, 'courseid' => $courseid], 'timecreated DESC', '*', 0, 100);
+$rows = [];
+foreach ($ledger as $l) $rows[] = ['date' => userdate($l->timecreated), 'description' => s($l->description ?: $l->reference), 'amount' => $l->amount, 'balance' => $l->balanceafter, 'positive' => $l->amount > 0];
+$ps = [];
+foreach ($purchases as $p) {
+    $r = $DB->get_record('local_rewardshop_rewards', ['id' => $p->rewardid]);
+    $snap = json_decode((string)$p->configsnapshot, true) ?: [];
+    $hint = '';
+    if (($snap['rewardtype'] ?? '') === 'reward_hint' && in_array($p->status, ['approved', 'delivered'], true)) $hint = clean_text((string)($snap['config']['hint'] ?? ''));
+    $ps[] = ['date' => userdate($p->timecreated), 'name' => format_string($r->name ?? ($snap['name'] ?? '')), 'cost' => $p->cost, 'status' => get_string('status_' . $p->status, 'local_rewardshop'), 'hint' => $hint];
+}
+echo $OUTPUT->header();
+echo $OUTPUT->render_from_template('local_rewardshop/my', ['balance' => \local_rewardshop\api::get_balance($USER->id, $courseid), 'ledger' => $rows, 'purchases' => $ps, 'shopurl' => (new moodle_url('/local/rewardshop/index.php', ['courseid' => $courseid]))->out(false)]);
+echo $OUTPUT->footer();
