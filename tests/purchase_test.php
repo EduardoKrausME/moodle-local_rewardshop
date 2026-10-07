@@ -70,7 +70,7 @@ final class purchase_test extends advanced_testcase {
         $u = $this->getDataGenerator()->create_user();
         $this->getDataGenerator()->enrol_user($u->id, $course->id, 'student');
         $this->setUser($u);
-        api::add_credits($u->id, $course->id, 500, 'seed', '', '', 'seed-' . $u->id);
+        api::add_credits($u->id, $course->id, 500, 'seed', '', null, 'seed-' . $u->id);
         return $u;
     }
 
