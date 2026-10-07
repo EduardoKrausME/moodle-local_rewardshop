@@ -74,7 +74,16 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
      */
     public static function get_contexts_for_userid(int $userid): contextlist {
         $l = new contextlist();
-        $sql = "SELECT DISTINCT ctx.id FROM {context} ctx JOIN {course} c ON ctx.instanceid=c.id LEFT JOIN {local_rewardshop_wallet} w ON w.courseid=c.id AND w.userid=:u1 LEFT JOIN {local_rewardshop_purchases} p ON p.courseid=c.id AND p.userid=:u2 WHERE ctx.contextlevel=:level AND (w.id IS NOT NULL OR p.id IS NOT NULL)";
+        $sql = "
+            SELECT DISTINCT ctx.id
+              FROM {context} ctx
+              JOIN {course} c ON ctx.instanceid=c.id
+         LEFT JOIN {local_rewardshop_wallet} w ON w.courseid=c.id
+                                              AND w.userid=:u1
+         LEFT JOIN {local_rewardshop_purchases} p ON p.courseid=c.id
+                                                 AND p.userid=:u2
+             WHERE ctx.contextlevel=:level
+               AND (w.id IS NOT NULL OR p.id IS NOT NULL)";
         $l->add_from_sql($sql, ['u1' => $userid, 'u2' => $userid, 'level' => CONTEXT_COURSE]);
         return $l;
     }
