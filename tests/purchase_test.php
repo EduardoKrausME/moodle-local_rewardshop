@@ -38,7 +38,24 @@ final class purchase_test extends advanced_testcase {
      */
     private function reward(int $courseid, array $x = []): stdClass {
         global $DB;
-        $d = (object)array_merge(['courseid' => $courseid, 'name' => 'Hint', 'description' => '', 'descriptionformat' => FORMAT_HTML, 'rewardtype' => 'reward_hint', 'cost' => 50, 'stock' => null, 'maxperuser' => 1, 'enabled' => 1, 'timestart' => 0, 'timeend' => 0, 'requiresapproval' => 0, 'configjson' => json_encode(['hint' => 'Use the index.']), 'sortorder' => 1, 'timecreated' => time(), 'timemodified' => time()], $x);
+        $d = (object)array_merge([
+            'courseid' => $courseid,
+            'name' => 'Hint',
+            'description' => '',
+            'descriptionformat' => FORMAT_HTML,
+            'rewardtype' => 'reward_hint',
+            'cost' => 50,
+            'stock' => null,
+            'maxperuser' => 1,
+            'enabled' => 1,
+            'timestart' => 0,
+            'timeend' => 0,
+            'requiresapproval' => 0,
+            'configjson' => json_encode(['hint' => 'Use the index.']),
+            'sortorder' => 1,
+            'timecreated' => time(),
+            'timemodified' => time(),
+        ], $x);
         $d->id = $DB->insert_record('local_rewardshop_rewards', $d);
         return $d;
     }

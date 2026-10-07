@@ -30,6 +30,7 @@ use invalid_parameter_exception;
  * Class reward_type_registry.
  */
 class reward_type_registry {
+    /** @var string[] */
     private const TYPES = [
         'reward_badge',
         'reward_contentunlock',

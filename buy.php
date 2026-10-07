@@ -36,7 +36,9 @@ $context = context_course::instance($course->id);
 require_capability('local/rewardshop:view', $context);
 try {
     api::purchase_reward($rewardid, $USER->id, $token);
-    redirect(new moodle_url('/local/rewardshop/my.php', ['courseid' => $course->id]), get_string('purchasesuccess', 'local_rewardshop'));
+    redirect(new moodle_url('/local/rewardshop/my.php',
+        ['courseid' => $course->id]), get_string('purchasesuccess', 'local_rewardshop'));
 } catch (Throwable $e) {
-    redirect(new moodle_url('/local/rewardshop/index.php', ['courseid' => $course->id]), $e->getMessage(), null, notification::NOTIFY_ERROR);
+    redirect(new moodle_url('/local/rewardshop/index.php',
+        ['courseid' => $course->id]), $e->getMessage(), null, notification::NOTIFY_ERROR);
 }

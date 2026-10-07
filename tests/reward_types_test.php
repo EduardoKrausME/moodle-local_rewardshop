@@ -59,8 +59,17 @@ final class reward_types_test extends advanced_testcase {
         $this->resetAfterTest();
         $c = $this->getDataGenerator()->create_course();
         $u = $this->getDataGenerator()->create_user();
-        global $DB;
-        $p = (object)['rewardid' => 1, 'userid' => $u->id, 'courseid' => $c->id, 'cost' => 0, 'status' => 'approved', 'requesttoken' => 'token-000000000000', 'configsnapshot' => '{}', 'timecreated' => time(), 'timemodified' => time()];/* Detailed module delivery covered by integration tests in Moodle site. */
+        $p = (object)[
+            'rewardid' => 1,
+            'userid' => $u->id,
+            'courseid' => $c->id,
+            'cost' => 0,
+            'status' => 'approved',
+            'requesttoken' => 'token-000000000000',
+            'configsnapshot' => '{}',
+            'timecreated' => time(),
+            'timemodified' => time(),
+        ];
         $this->assertFalse(api::has_content_unlock($u->id, 999999));
     }
 }

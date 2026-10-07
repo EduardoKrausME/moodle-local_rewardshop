@@ -87,11 +87,16 @@ foreach ($rewards as $r) {
         'cost' => $r->cost,
         'enabled' => $r->enabled,
         'type' => reward_type_registry::get($r->rewardtype)->get_name(),
-        'editurl' => new moodle_url('/local/rewardshop/edit.php', ['courseid' => $courseid, 'id' => $r->id]),
-        'toggleurl' => new moodle_url('/local/rewardshop/manage.php', ['courseid' => $courseid, 'id' => $r->id, 'action' => 'toggle', 'sesskey' => sesskey()]),
-        'duplicateurl' => new moodle_url('/local/rewardshop/manage.php', ['courseid' => $courseid, 'id' => $r->id, 'action' => 'duplicate', 'sesskey' => sesskey()]),
-        'upurl' => new moodle_url('/local/rewardshop/manage.php', ['courseid' => $courseid, 'id' => $r->id, 'action' => 'up', 'sesskey' => sesskey()]),
-        'downurl' => new moodle_url('/local/rewardshop/manage.php', ['courseid' => $courseid, 'id' => $r->id, 'action' => 'down', 'sesskey' => sesskey()]),
+        'editurl' => new moodle_url('/local/rewardshop/edit.php',
+            ['courseid' => $courseid, 'id' => $r->id]),
+        'toggleurl' => new moodle_url('/local/rewardshop/manage.php',
+            ['courseid' => $courseid, 'id' => $r->id, 'action' => 'toggle', 'sesskey' => sesskey()]),
+        'duplicateurl' => new moodle_url('/local/rewardshop/manage.php',
+            ['courseid' => $courseid, 'id' => $r->id, 'action' => 'duplicate', 'sesskey' => sesskey()]),
+        'upurl' => new moodle_url('/local/rewardshop/manage.php',
+            ['courseid' => $courseid, 'id' => $r->id, 'action' => 'up', 'sesskey' => sesskey()]),
+        'downurl' => new moodle_url('/local/rewardshop/manage.php',
+            ['courseid' => $courseid, 'id' => $r->id, 'action' => 'down', 'sesskey' => sesskey()]),
     ];
 }
 echo $OUTPUT->header();

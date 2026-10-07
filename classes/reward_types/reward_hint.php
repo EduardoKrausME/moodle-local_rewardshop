@@ -78,6 +78,6 @@ class reward_hint extends base {
      * @param int $userid Parameter userid.
      * @return void Return value.
      */
-    public function deliver(stdClass $purchase, stdClass $reward, int $userid): void { /* Hint lives in immutable config snapshot and is shown in My purchases. */
+    public function deliver(stdClass $purchase, stdClass $reward, int $userid): void {
     }
 }

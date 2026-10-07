@@ -42,8 +42,8 @@ class api {
      * @param ?string $idempotencykey Parameter idempotencykey.
      * @return int Return value.
      */
-    public static function add_credits(int     $userid, int $courseid, int $amount,
-                                       string  $reference, string $description = '', ?int $relatedid = null,
+    public static function add_credits(int $userid, int $courseid, int $amount,
+                                       string $reference, string $description = '', ?int $relatedid = null,
                                        ?string $idempotencykey = null): int {
         return wallet_service::change($userid, $courseid, abs($amount), 'earn',
             $reference, $description, $relatedid, $idempotencykey);
@@ -61,8 +61,8 @@ class api {
      * @param ?string $idempotencykey Parameter idempotencykey.
      * @return int Return value.
      */
-    public static function spend_credits(int     $userid, int $courseid, int $amount,
-                                         string  $reference, string $description = '', ?int $relatedid = null,
+    public static function spend_credits(int $userid, int $courseid, int $amount,
+                                         string $reference, string $description = '', ?int $relatedid = null,
                                          ?string $idempotencykey = null): int {
         return wallet_service::change($userid, $courseid, -abs($amount), 'spend',
             $reference, $description, $relatedid, $idempotencykey);
@@ -80,7 +80,7 @@ class api {
      * @param ?string $idempotencykey Parameter idempotencykey.
      * @return int Return value.
      */
-    public static function refund(int    $userid, int $courseid, int $amount, string $reference,
+    public static function refund(int $userid, int $courseid, int $amount, string $reference,
                                   string $description = '', ?int $relatedid = null, ?string $idempotencykey = null): int {
         return wallet_service::change($userid, $courseid, abs($amount), 'refund',
             $reference, $description, $relatedid, $idempotencykey);

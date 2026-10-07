@@ -37,6 +37,7 @@ use stdClass;
  * Class purchase_service.
  */
 class purchase_service {
+    /** @var string[] */
     private const ACTIVE = ['pending', 'approved', 'delivered'];
 
     /**
@@ -75,7 +76,8 @@ class purchase_service {
             $errors[] = get_string('limitreached', 'local_rewardshop');
         }
         if ($reward->stock !== null) {
-            $sold = $DB->count_records_select('local_rewardshop_purchases', "rewardid=:r AND status $insql", array_merge(['r' => $rewardid], array_diff_key($params, ['u' => 1])));
+            $sold = $DB->count_records_select('local_rewardshop_purchases', "rewardid=:r AND status $insql",
+                array_merge(['r' => $rewardid], array_diff_key($params, ['u' => 1])));
             if ($sold >= (int)$reward->stock) {
                 $errors[] = get_string('outofstock', 'local_rewardshop');
             }
@@ -144,7 +146,8 @@ class purchase_service {
             ];
             $p->id = $DB->insert_record('local_rewardshop_purchases', $p);
             if ($p->cost > 0) {
-                api::spend_credits($userid, $reward->courseid, $p->cost, 'purchase', get_string('ledgerpurchase', 'local_rewardshop', $reward->name), $p->id, 'purchase:' . $p->id);
+                api::spend_credits($userid, $reward->courseid, $p->cost, 'purchase',
+                    get_string('ledgerpurchase', 'local_rewardshop', $reward->name), $p->id, 'purchase:' . $p->id);
             }
             $type = reward_type_registry::get($reward->rewardtype);
             $type->purchase($p, $reward, $userid);
@@ -211,7 +214,8 @@ class purchase_service {
         $p->timemodified = time();
         $DB->update_record('local_rewardshop_purchases', $p);
         if (!$approve && $p->cost > 0) {
-            api::refund($p->userid, $p->courseid, $p->cost, 'rejection', get_string('ledgerrejection', 'local_rewardshop'), $p->id, 'reject:' . $p->id);
+            api::refund($p->userid, $p->courseid, $p->cost, 'rejection',
+                get_string('ledgerrejection', 'local_rewardshop'), $p->id, 'reject:' . $p->id);
         }
         $event = $approve ? '\\local_rewardshop\\event\\reward_approved' : '\\local_rewardshop\\event\\reward_rejected';
         $event::create(['context' => $ctx, 'objectid' => $p->id, 'relateduserid' => $p->userid])->trigger();
@@ -246,7 +250,11 @@ class purchase_service {
         $p->status = 'delivered';
         $p->timemodified = time();
         $DB->update_record('local_rewardshop_purchases', $p);
-        reward_delivered::create(['context' => context_course::instance($p->courseid), 'objectid' => $p->id, 'relateduserid' => $p->userid])->trigger();
+        reward_delivered::create([
+            'context' => context_course::instance($p->courseid),
+            'objectid' => $p->id,
+            'relateduserid' => $p->userid,
+            ])->trigger();
     }
 
     /**

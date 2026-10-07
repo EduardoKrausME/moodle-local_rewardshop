@@ -27,7 +27,11 @@ namespace local_rewardshop;
 use advanced_testcase;
 use moodle_exception;
 
-/** @covers \local_rewardshop\api */
+/**
+ * Class api_test
+ *
+ * @covers \local_rewardshop\api
+ */
 final class api_test extends advanced_testcase {
     /**
      * Method test_wallet_and_idempotency.

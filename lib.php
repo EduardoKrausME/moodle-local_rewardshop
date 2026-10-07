@@ -22,7 +22,6 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die;
 /**
  * local_rewardshop_extend_navigation_course
  *
@@ -38,7 +37,8 @@ function local_rewardshop_extend_navigation_course($navigation, $course, $contex
         return;
     }
     $navigation->add(get_string('pluginname', 'local_rewardshop'),
-        new moodle_url('/local/rewardshop/index.php', ['courseid' => $course->id]), navigation_node::TYPE_CUSTOM, null, 'local_rewardshop');
+        new moodle_url('/local/rewardshop/index.php',
+            ['courseid' => $course->id]), navigation_node::TYPE_CUSTOM, null, 'local_rewardshop');
 }
 
 /**

@@ -90,7 +90,14 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
         $u = $contexts->get_user()->id;
         foreach ($contexts->get_contexts() as $ctx) {
             $c = $ctx->instanceid;
-            $data = ['wallet' => $DB->get_record('local_rewardshop_wallet', ['userid' => $u, 'courseid' => $c]), 'ledger' => array_values($DB->get_records('local_rewardshop_ledger', ['userid' => $u, 'courseid' => $c], 'timecreated ASC')), 'purchases' => array_values($DB->get_records('local_rewardshop_purchases', ['userid' => $u, 'courseid' => $c], 'timecreated ASC'))];
+            $data = [
+                'wallet' => $DB->get_record('local_rewardshop_wallet',
+                    ['userid' => $u, 'courseid' => $c]),
+                'ledger' => array_values($DB->get_records('local_rewardshop_ledger',
+                    ['userid' => $u, 'courseid' => $c], 'timecreated ASC')),
+                'purchases' => array_values($DB->get_records('local_rewardshop_purchases',
+                    ['userid' => $u, 'courseid' => $c], 'timecreated ASC')),
+            ];
             writer::with_context($ctx)->export_data([get_string('pluginname', 'local_rewardshop')], (object)$data);
         }
     }

@@ -33,6 +33,7 @@ use moodle_exception;
  * Class wallet_service.
  */
 class wallet_service {
+    /** @var string[] */
     private const TYPES = ['earn', 'spend', 'refund', 'adjustment'];
 
     /**
@@ -60,7 +61,9 @@ class wallet_service {
      * @param ?string $idempotencykey Parameter idempotencykey.
      * @return int Return value.
      */
-    public static function change(int $userid, int $courseid, int $amount, string $type, string $reference, string $description = '', ?int $relatedid = null, ?string $idempotencykey = null): int {
+    public static function change(int $userid, int $courseid, int $amount,
+                                  string $type, string $reference, string $description = '',
+                                  ?int $relatedid = null, ?string $idempotencykey = null): int {
         global $DB;
         if ($userid <= 0 || $courseid <= 0 || $amount === 0 || !in_array($type, self::TYPES, true)) {
             throw new invalid_parameter_exception('Invalid wallet change');
@@ -86,7 +89,14 @@ class wallet_service {
             $now = time();
             $wallet = $DB->get_record('local_rewardshop_wallet', ['userid' => $userid, 'courseid' => $courseid]);
             if (!$wallet) {
-                $wallet = (object)['userid' => $userid, 'courseid' => $courseid, 'balance' => 0, 'lifetimeearned' => 0, 'lifetimespent' => 0, 'timemodified' => $now];
+                $wallet = (object)[
+                    'userid' => $userid,
+                    'courseid' => $courseid,
+                    'balance' => 0,
+                    'lifetimeearned' => 0,
+                    'lifetimespent' => 0,
+                    'timemodified' => $now,
+                ];
                 $wallet->id = $DB->insert_record('local_rewardshop_wallet', $wallet);
             }
             $new = (int)$wallet->balance + $amount;
