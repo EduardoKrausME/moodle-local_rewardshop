@@ -27,7 +27,12 @@ namespace local_rewardshop;
 use advanced_testcase;
 
 /**
- * Class reward_types_test.
+ * Tests for reward type behavior.
+ *
+ * @covers \local_rewardshop\reward_type_registry
+ * @covers \local_rewardshop\reward_types\reward_quizattempt
+ * @covers \local_rewardshop\reward_types\reward_extension
+ * @covers \local_rewardshop\api
  */
 final class reward_types_test extends advanced_testcase {
     /**
