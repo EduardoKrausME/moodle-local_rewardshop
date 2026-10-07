@@ -27,5 +27,5 @@ $plugin->release = '1.0.1';
 $plugin->version = 2026100300;
 $plugin->component = 'local_rewardshop';
 $plugin->requires = 2022112800; // Moodle 4.1.
-$plugin->maturity = MATURITY_BETA;
+$plugin->maturity = MATURITY_STABLE;
 $plugin->dependencies = ['local_personalxp' => ANY_VERSION];
