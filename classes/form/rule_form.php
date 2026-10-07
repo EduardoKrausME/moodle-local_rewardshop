@@ -23,13 +23,16 @@
  */
 
 namespace local_rewardshop\form;
+
+use moodleform;
+
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/formslib.php');
 
 /**
  * Class rule_form.
  */
-class rule_form extends \moodleform {
+class rule_form extends moodleform {
     /**
      * Method definition.
      *
@@ -58,8 +61,12 @@ class rule_form extends \moodleform {
      */
     public function validation($d, $f) {
         $e = [];
-        if ((int)$d['xpstep'] <= 0) $e['xpstep'] = get_string('mustbepositive', 'local_rewardshop');
-        if ((int)$d['credits'] <= 0) $e['credits'] = get_string('mustbepositive', 'local_rewardshop');
+        if ((int)$d['xpstep'] <= 0) {
+            $e['xpstep'] = get_string('mustbepositive', 'local_rewardshop');
+        }
+        if ((int)$d['credits'] <= 0) {
+            $e['credits'] = get_string('mustbepositive', 'local_rewardshop');
+        }
         return $e;
     }
 }

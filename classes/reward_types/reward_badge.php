@@ -23,6 +23,10 @@
  */
 
 namespace local_rewardshop\reward_types;
+
+use moodle_exception;
+use stdClass;
+
 /**
  * Class reward_badge.
  */
@@ -49,11 +53,13 @@ class reward_badge extends base {
      * Method validate_configuration.
      *
      * @param array $config Parameter config.
-     * @param \stdClass $reward Parameter reward.
+     * @param stdClass $reward Parameter reward.
      * @return array Return value.
      */
-    public function validate_configuration(array $config, \stdClass $reward): array {
-        return empty($config['badgeid']) ? ['badgeid' => get_string('errorbadgeid', 'local_rewardshop')] : [];
+    public function validate_configuration(array $config, stdClass $reward): array {
+        return empty($config['badgeid']) ? [
+            'badgeid' => get_string('errorbadgeid', 'local_rewardshop'),
+        ] : [];
     }
 
     /**
@@ -68,16 +74,16 @@ class reward_badge extends base {
     /**
      * Method deliver.
      *
-     * @param \stdClass $purchase Parameter purchase.
-     * @param \stdClass $reward Parameter reward.
+     * @param stdClass $purchase Parameter purchase.
+     * @param stdClass $reward Parameter reward.
      * @param int $userid Parameter userid.
      * @return void Return value.
      */
-    public function deliver(\stdClass $purchase, \stdClass $reward, int $userid): void {
+    public function deliver(stdClass $purchase, stdClass $reward, int $userid): void {
         $config = $this->config($reward);
         $badgeid = (int)($config['badgeid'] ?? 0);
         if (!$badgeid || !function_exists('badge_award')) {
-            throw new \moodle_exception('deliverynotsupported', 'local_rewardshop');
+            throw new moodle_exception('deliverynotsupported', 'local_rewardshop');
         }
         global $CFG;
         require_once($CFG->libdir . '/badgeslib.php');

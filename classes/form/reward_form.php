@@ -23,13 +23,17 @@
  */
 
 namespace local_rewardshop\form;
+
+use local_rewardshop\reward_type_registry;
+use moodleform;
+
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/formslib.php');
 
 /**
  * Class reward_form.
  */
-class reward_form extends \moodleform {
+class reward_form extends moodleform {
     /**
      * Method definition.
      *
@@ -46,7 +50,9 @@ class reward_form extends \moodleform {
         $m->setType('name', PARAM_TEXT);
         $m->addRule('name', null, 'required');
         $m->addElement('editor', 'description_editor', get_string('description'), null, ['maxfiles' => 0]);
-        $m->addElement('select', 'rewardtype', get_string('rewardtype', 'local_rewardshop'), \local_rewardshop\reward_type_registry::all());
+        $m->addElement('select', 'rewardtype',
+            get_string('rewardtype', 'local_rewardshop'),
+            reward_type_registry::all());
         $m->addElement('text', 'cost', get_string('cost', 'local_rewardshop'));
         $m->setType('cost', PARAM_INT);
         $m->setDefault('cost', 0);
@@ -57,12 +63,18 @@ class reward_form extends \moodleform {
         $m->setDefault('maxperuser', 1);
         $m->addElement('advcheckbox', 'enabled', get_string('enabled', 'local_rewardshop'));
         $m->setDefault('enabled', 1);
-        $m->addElement('date_time_selector', 'timestart', get_string('timestart', 'local_rewardshop'), ['optional' => true]);
-        $m->addElement('date_time_selector', 'timeend', get_string('timeend', 'local_rewardshop'), ['optional' => true]);
-        $m->addElement('advcheckbox', 'requiresapproval', get_string('requiresapproval', 'local_rewardshop'));
-        $m->addElement('textarea', 'configjson', get_string('configjson', 'local_rewardshop'), 'rows="8" cols="70"');
+        $m->addElement('date_time_selector', 'timestart',
+            get_string('timestart', 'local_rewardshop'), ['optional' => true]);
+        $m->addElement('date_time_selector', 'timeend',
+            get_string('timeend', 'local_rewardshop'), ['optional' => true]);
+        $m->addElement('advcheckbox', 'requiresapproval',
+            get_string('requiresapproval', 'local_rewardshop'));
+        $m->addElement('textarea', 'configjson',
+            get_string('configjson', 'local_rewardshop'), 'rows="8" cols="70"');
         $m->setType('configjson', PARAM_RAW);
-        $m->addElement('filemanager', 'rewardimage', get_string('image', 'local_rewardshop'), null, ['subdirs' => 0, 'maxfiles' => 1, 'accepted_types' => ['image']]);
+        $m->addElement('filemanager', 'rewardimage',
+            get_string('image', 'local_rewardshop'), null,
+            ['subdirs' => 0, 'maxfiles' => 1, 'accepted_types' => ['image']]);
         $this->add_action_buttons();
     }
 
@@ -75,11 +87,17 @@ class reward_form extends \moodleform {
      */
     public function validation($data, $files) {
         $e = parent::validation($data, $files);
-        if ((int)$data['cost'] < 0) $e['cost'] = get_string('invalidcost', 'local_rewardshop');
+        if ((int)$data['cost'] < 0) {
+            $e['cost'] = get_string('invalidcost', 'local_rewardshop');
+        }
         $cfg = json_decode((string)$data['configjson'], true);
-        if ($data['configjson'] !== '' && !is_array($cfg)) $e['configjson'] = get_string('invalidjson', 'local_rewardshop');
+        if ($data['configjson'] !== '' && !is_array($cfg)) {
+            $e['configjson'] = get_string('invalidjson', 'local_rewardshop');
+        }
         if (is_array($cfg)) {
-            foreach (\local_rewardshop\reward_type_registry::get($data['rewardtype'])->validate_configuration($cfg, (object)$data) as $k => $v) $e[$k === 'configjson' ? $k : 'configjson'] = $v;
+            foreach (reward_type_registry::get($data['rewardtype'])->validate_configuration($cfg, (object)$data) as $k => $v) {
+                $e[$k === 'configjson' ? $k : 'configjson'] = $v;
+            }
         }
         return $e;
     }

@@ -23,6 +23,10 @@
  */
 
 namespace local_rewardshop;
+
+use context_course;
+use stdClass;
+
 /**
  * Interface reward_type_interface.
  */
@@ -45,50 +49,50 @@ interface reward_type_interface {
      * Method validate_configuration.
      *
      * @param array $config Parameter config.
-     * @param \stdClass $reward Parameter reward.
+     * @param stdClass $reward Parameter reward.
      * @return array Return value.
      */
-    public function validate_configuration(array $config, \stdClass $reward): array;
+    public function validate_configuration(array $config, stdClass $reward): array;
 
     /**
      * Method can_purchase.
      *
-     * @param \stdClass $reward Parameter reward.
+     * @param stdClass $reward Parameter reward.
      * @param int $userid Parameter userid.
-     * @param \context_course $context Parameter context.
+     * @param context_course $context Parameter context.
      * @return array Return value.
      */
-    public function can_purchase(\stdClass $reward, int $userid, \context_course $context): array;
+    public function can_purchase(stdClass $reward, int $userid, context_course $context): array;
 
     /**
      * Method purchase.
      *
-     * @param \stdClass $purchase Parameter purchase.
-     * @param \stdClass $reward Parameter reward.
+     * @param stdClass $purchase Parameter purchase.
+     * @param stdClass $reward Parameter reward.
      * @param int $userid Parameter userid.
      * @return void Return value.
      */
-    public function purchase(\stdClass $purchase, \stdClass $reward, int $userid): void;
+    public function purchase(stdClass $purchase, stdClass $reward, int $userid): void;
 
     /**
      * Method deliver.
      *
-     * @param \stdClass $purchase Parameter purchase.
-     * @param \stdClass $reward Parameter reward.
+     * @param stdClass $purchase Parameter purchase.
+     * @param stdClass $reward Parameter reward.
      * @param int $userid Parameter userid.
      * @return void Return value.
      */
-    public function deliver(\stdClass $purchase, \stdClass $reward, int $userid): void;
+    public function deliver(stdClass $purchase, stdClass $reward, int $userid): void;
 
     /**
      * Method cancel.
      *
-     * @param \stdClass $purchase Parameter purchase.
-     * @param \stdClass $reward Parameter reward.
+     * @param stdClass $purchase Parameter purchase.
+     * @param stdClass $reward Parameter reward.
      * @param int $userid Parameter userid.
      * @return void Return value.
      */
-    public function cancel(\stdClass $purchase, \stdClass $reward, int $userid): void;
+    public function cancel(stdClass $purchase, stdClass $reward, int $userid): void;
 
     /**
      * Method supports_automatic_delivery.

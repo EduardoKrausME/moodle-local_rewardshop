@@ -22,6 +22,9 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use core\output\notification;
+use local_rewardshop\api;
+
 require_once(__DIR__ . '/../../config.php');
 require_sesskey();
 $rewardid = required_param('rewardid', PARAM_INT);
@@ -32,8 +35,8 @@ require_login($course);
 $context = context_course::instance($course->id);
 require_capability('local/rewardshop:view', $context);
 try {
-    \local_rewardshop\api::purchase_reward($rewardid, $USER->id, $token);
+    api::purchase_reward($rewardid, $USER->id, $token);
     redirect(new moodle_url('/local/rewardshop/my.php', ['courseid' => $course->id]), get_string('purchasesuccess', 'local_rewardshop'));
 } catch (Throwable $e) {
-    redirect(new moodle_url('/local/rewardshop/index.php', ['courseid' => $course->id]), $e->getMessage(), null, \core\output\notification::NOTIFY_ERROR);
+    redirect(new moodle_url('/local/rewardshop/index.php', ['courseid' => $course->id]), $e->getMessage(), null, notification::NOTIFY_ERROR);
 }

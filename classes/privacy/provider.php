@@ -24,6 +24,7 @@
 
 namespace local_rewardshop\privacy;
 
+use context;
 use core_privacy\local\metadata\collection;
 use core_privacy\local\request\approved_contextlist;
 use core_privacy\local\request\contextlist;
@@ -40,9 +41,28 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
      * @return collection Return value.
      */
     public static function get_metadata(collection $c): collection {
-        $c->add_database_table('local_rewardshop_wallet', ['userid' => 'privacy:userid', 'courseid' => 'privacy:courseid', 'balance' => 'privacy:balance', 'lifetimeearned' => 'privacy:lifetimeearned', 'lifetimespent' => 'privacy:lifetimespent'], 'privacy:wallet');
-        $c->add_database_table('local_rewardshop_ledger', ['userid' => 'privacy:userid', 'courseid' => 'privacy:courseid', 'amount' => 'privacy:amount', 'description' => 'privacy:description'], 'privacy:ledger');
-        $c->add_database_table('local_rewardshop_purchases', ['userid' => 'privacy:userid', 'courseid' => 'privacy:courseid', 'status' => 'privacy:status', 'configsnapshot' => 'privacy:configsnapshot'], 'privacy:purchases');
+        $c->add_database_table('local_rewardshop_wallet',
+            [
+                'userid' => 'privacy:userid',
+                'courseid' => 'privacy:courseid',
+                'balance' => 'privacy:balance',
+                'lifetimeearned' => 'privacy:lifetimeearned',
+                'lifetimespent' => 'privacy:lifetimespent',
+            ], 'privacy:wallet');
+        $c->add_database_table('local_rewardshop_ledger',
+            [
+                'userid' => 'privacy:userid',
+                'courseid' => 'privacy:courseid',
+                'amount' => 'privacy:amount',
+                'description' => 'privacy:description',
+            ], 'privacy:ledger');
+        $c->add_database_table('local_rewardshop_purchases',
+            [
+                'userid' => 'privacy:userid',
+                'courseid' => 'privacy:courseid',
+                'status' => 'privacy:status',
+                'configsnapshot' => 'privacy:configsnapshot',
+            ], 'privacy:purchases');
         return $c;
     }
 
@@ -78,14 +98,20 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
     /**
      * Method delete_data_for_all_users_in_context.
      *
-     * @param \context $context Parameter context.
+     * @param context $context Parameter context.
      * @return void Return value.
      */
-    public static function delete_data_for_all_users_in_context(\context $context): void {
+    public static function delete_data_for_all_users_in_context(context $context): void {
         global $DB;
-        if ($context->contextlevel !== CONTEXT_COURSE) return;
+        if ($context->contextlevel !== CONTEXT_COURSE) {
+            return;
+        }
         $c = $context->instanceid;
-        foreach (['local_rewardshop_unlocks', 'local_rewardshop_purchases', 'local_rewardshop_ledger', 'local_rewardshop_wallet'] as $t) $DB->delete_records($t, ['courseid' => $c]);
+
+        $ts = ['local_rewardshop_unlocks', 'local_rewardshop_purchases', 'local_rewardshop_ledger', 'local_rewardshop_wallet'];
+        foreach ($ts as $t) {
+            $DB->delete_records($t, ['courseid' => $c]);
+        }
     }
 
     /**
@@ -99,7 +125,11 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
         $u = $contexts->get_user()->id;
         foreach ($contexts->get_contexts() as $ctx) {
             $c = $ctx->instanceid;
-            foreach (['local_rewardshop_unlocks', 'local_rewardshop_purchases', 'local_rewardshop_ledger', 'local_rewardshop_wallet'] as $t) $DB->delete_records($t, ['courseid' => $c, 'userid' => $u]);
+
+            $ts = ['local_rewardshop_unlocks', 'local_rewardshop_purchases', 'local_rewardshop_ledger', 'local_rewardshop_wallet'];
+            foreach ($ts as $t) {
+                $DB->delete_records($t, ['courseid' => $c, 'userid' => $u]);
+            }
         }
     }
 }

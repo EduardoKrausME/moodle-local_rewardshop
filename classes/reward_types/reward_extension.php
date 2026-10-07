@@ -23,6 +23,10 @@
  */
 
 namespace local_rewardshop\reward_types;
+
+use moodle_exception;
+use stdClass;
+
 /**
  * Class reward_extension.
  */
@@ -49,13 +53,17 @@ class reward_extension extends base {
      * Method validate_configuration.
      *
      * @param array $config Parameter config.
-     * @param \stdClass $reward Parameter reward.
+     * @param stdClass $reward Parameter reward.
      * @return array Return value.
      */
-    public function validate_configuration(array $config, \stdClass $reward): array {
+    public function validate_configuration(array $config, stdClass $reward): array {
         $e = [];
-        if (empty($config['cmid'])) $e['cmid'] = get_string('errorcmid', 'local_rewardshop');
-        if ((int)($config['seconds'] ?? 0) <= 0) $e['seconds'] = get_string('errorextension', 'local_rewardshop');
+        if (empty($config['cmid'])) {
+            $e['cmid'] = get_string('errorcmid', 'local_rewardshop');
+        }
+        if ((int)($config['seconds'] ?? 0) <= 0) {
+            $e['seconds'] = get_string('errorextension', 'local_rewardshop');
+        }
         return $e;
     }
 
@@ -71,14 +79,14 @@ class reward_extension extends base {
     /**
      * Method deliver.
      *
-     * @param \stdClass $purchase Parameter purchase.
-     * @param \stdClass $reward Parameter reward.
+     * @param stdClass $purchase Parameter purchase.
+     * @param stdClass $reward Parameter reward.
      * @param int $userid Parameter userid.
      * @return void Return value.
      */
-    public function deliver(\stdClass $purchase, \stdClass $reward, int $userid): void {
+    public function deliver(stdClass $purchase, stdClass $reward, int $userid): void {
         // Moodle 4.1-4.6 does not expose one stable generic deadline-extension API for every activity.
         // Never write activity-plugin tables directly; unsupported targets stay manual.
-        throw new \moodle_exception('extensionmanual', 'local_rewardshop');
+        throw new moodle_exception('extensionmanual', 'local_rewardshop');
     }
 }

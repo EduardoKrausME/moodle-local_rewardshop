@@ -24,9 +24,17 @@
 
 defined('MOODLE_INTERNAL') || die;
 if ($hassiteconfig) {
-    $settings = new admin_settingpage('local_rewardshop', get_string('pluginname', 'local_rewardshop'));
+    $settings = new admin_settingpage('local_rewardshop',
+        get_string('pluginname', 'local_rewardshop'));
     $ADMIN->add('localplugins', $settings);
-    $settings->add(new admin_setting_configcheckbox('local_rewardshop/enabled', get_string('enabled', 'local_rewardshop'), get_string('enableddesc', 'local_rewardshop'), 1));
-    $settings->add(new admin_setting_configtext('local_rewardshop/defaultxpstep', get_string('defaultxpstep', 'local_rewardshop'), '', 500, PARAM_INT));
-    $settings->add(new admin_setting_configtext('local_rewardshop/defaultcredits', get_string('defaultcredits', 'local_rewardshop'), '', 50, PARAM_INT));
+
+    $settings->add(new admin_setting_configcheckbox('local_rewardshop/enabled',
+        get_string('enabled', 'local_rewardshop'),
+        get_string('enableddesc', 'local_rewardshop'), 1));
+
+    $settings->add(new admin_setting_configtext('local_rewardshop/defaultxpstep',
+        get_string('defaultxpstep', 'local_rewardshop'), '', 500, PARAM_INT));
+
+    $settings->add(new admin_setting_configtext('local_rewardshop/defaultcredits',
+        get_string('defaultcredits', 'local_rewardshop'), '', 50, PARAM_INT));
 }

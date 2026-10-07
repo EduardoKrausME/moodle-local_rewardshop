@@ -36,14 +36,20 @@ class personalxp_bridge {
      */
     public static function sync_user_course(int $userid, int $courseid): int {
         global $DB;
-        if (!class_exists('\\local_personalxp\\service\\xp_manager')) return 0;
+        if (!class_exists('\\local_personalxp\\service\\xp_manager')) {
+            return 0;
+        }
         $rule = $DB->get_record('local_rewardshop_rules', ['courseid' => $courseid]);
         $step = $rule ? (int)$rule->xpstep : (int)(get_config('local_rewardshop', 'defaultxpstep') ?: 500);
         $credits = $rule ? (int)$rule->credits : (int)(get_config('local_rewardshop', 'defaultcredits') ?: 50);
-        if ($rule && !$rule->enabled) return 0;
-        if ($step <= 0 || $credits <= 0) return 0;
+        if ($rule && !$rule->enabled) {
+            return 0;
+        }
+        if ($step <= 0 || $credits <= 0) {
+            return 0;
+        }
         $class = '\\local_personalxp\\service\\xp_manager';
-        $xp = (int)$class::get_total($userid, $courseid);
+        $xp = $class::get_total($userid, $courseid);
         $milestones = intdiv($xp, $step);
         $granted = 0;
         for ($m = 1; $m <= $milestones; $m++) {
@@ -51,7 +57,9 @@ class personalxp_bridge {
             $idkey = "personalxp|{$userid}|{$courseid}|{$step}|{$m}";
             $storedhash = hash('sha256', $idkey);
             if (!$DB->record_exists('local_rewardshop_ledger', ['uniquehash' => $storedhash])) {
-                api::add_credits($userid, $courseid, $credits, $ref, get_string('xpcreditaward', 'local_rewardshop', (object)['xp' => $m * $step, 'credits' => $credits]), null, $idkey);
+                api::add_credits($userid, $courseid, $credits, $ref,
+                    get_string('xpcreditaward', 'local_rewardshop', (object)['xp' => $m * $step, 'credits' => $credits]),
+                    null, $idkey);
                 $granted += $credits;
             }
         }

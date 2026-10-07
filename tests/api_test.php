@@ -23,8 +23,12 @@
  */
 
 namespace local_rewardshop;
+
+use advanced_testcase;
+use moodle_exception;
+
 /** @covers \local_rewardshop\api */
-final class api_test extends \advanced_testcase {
+final class api_test extends advanced_testcase {
     /**
      * Method test_wallet_and_idempotency.
      *
@@ -51,7 +55,7 @@ final class api_test extends \advanced_testcase {
         $this->resetAfterTest();
         $c = $this->getDataGenerator()->create_course();
         $u = $this->getDataGenerator()->create_user();
-        $this->expectException(\moodle_exception::class);
+        $this->expectException(moodle_exception::class);
         api::spend_credits($u->id, $c->id, 1, 'test', '', '', 'spend-no-balance');
     }
 

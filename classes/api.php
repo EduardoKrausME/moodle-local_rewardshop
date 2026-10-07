@@ -23,6 +23,9 @@
  */
 
 namespace local_rewardshop;
+
+use stdClass;
+
 /**
  * Class api.
  */
@@ -39,8 +42,11 @@ class api {
      * @param ?string $idempotencykey Parameter idempotencykey.
      * @return int Return value.
      */
-    public static function add_credits(int $userid, int $courseid, int $amount, string $reference, string $description = '', ?int $relatedid = null, ?string $idempotencykey = null): int {
-        return wallet_service::change($userid, $courseid, abs($amount), 'earn', $reference, $description, $relatedid, $idempotencykey);
+    public static function add_credits(int     $userid, int $courseid, int $amount,
+                                       string  $reference, string $description = '', ?int $relatedid = null,
+                                       ?string $idempotencykey = null): int {
+        return wallet_service::change($userid, $courseid, abs($amount), 'earn',
+            $reference, $description, $relatedid, $idempotencykey);
     }
 
     /**
@@ -55,8 +61,11 @@ class api {
      * @param ?string $idempotencykey Parameter idempotencykey.
      * @return int Return value.
      */
-    public static function spend_credits(int $userid, int $courseid, int $amount, string $reference, string $description = '', ?int $relatedid = null, ?string $idempotencykey = null): int {
-        return wallet_service::change($userid, $courseid, -abs($amount), 'spend', $reference, $description, $relatedid, $idempotencykey);
+    public static function spend_credits(int     $userid, int $courseid, int $amount,
+                                         string  $reference, string $description = '', ?int $relatedid = null,
+                                         ?string $idempotencykey = null): int {
+        return wallet_service::change($userid, $courseid, -abs($amount), 'spend',
+            $reference, $description, $relatedid, $idempotencykey);
     }
 
     /**
@@ -71,8 +80,10 @@ class api {
      * @param ?string $idempotencykey Parameter idempotencykey.
      * @return int Return value.
      */
-    public static function refund(int $userid, int $courseid, int $amount, string $reference, string $description = '', ?int $relatedid = null, ?string $idempotencykey = null): int {
-        return wallet_service::change($userid, $courseid, abs($amount), 'refund', $reference, $description, $relatedid, $idempotencykey);
+    public static function refund(int    $userid, int $courseid, int $amount, string $reference,
+                                  string $description = '', ?int $relatedid = null, ?string $idempotencykey = null): int {
+        return wallet_service::change($userid, $courseid, abs($amount), 'refund',
+            $reference, $description, $relatedid, $idempotencykey);
     }
 
     /**
@@ -103,9 +114,9 @@ class api {
      * @param int $rewardid Parameter rewardid.
      * @param int $userid Parameter userid.
      * @param string $requesttoken Parameter requesttoken.
-     * @return \stdClass Return value.
+     * @return stdClass Return value.
      */
-    public static function purchase_reward(int $rewardid, int $userid, string $requesttoken): \stdClass {
+    public static function purchase_reward(int $rewardid, int $userid, string $requesttoken): stdClass {
         return purchase_service::purchase($rewardid, $userid, $requesttoken);
     }
 
@@ -119,7 +130,12 @@ class api {
     public static function has_content_unlock(int $userid, int $cmid): bool {
         global $DB;
         $now = time();
-        $sql = "SELECT 1 FROM {local_rewardshop_unlocks} WHERE userid=:u AND cmid=:c AND (timeexpires=0 OR timeexpires>:now)";
+        $sql = "
+            SELECT 1
+              FROM {local_rewardshop_unlocks}
+             WHERE userid=:u
+               AND cmid=:c
+               AND (timeexpires=0 OR timeexpires>:now)";
         return $DB->record_exists_sql($sql, ['u' => $userid, 'c' => $cmid, 'now' => $now]);
     }
 }

@@ -23,6 +23,10 @@
  */
 
 namespace local_rewardshop\reward_types;
+
+use moodle_exception;
+use stdClass;
+
 /**
  * Class reward_custom.
  */
@@ -57,12 +61,12 @@ class reward_custom extends base {
     /**
      * Method deliver.
      *
-     * @param \stdClass $purchase Parameter purchase.
-     * @param \stdClass $reward Parameter reward.
+     * @param stdClass $purchase Parameter purchase.
+     * @param stdClass $reward Parameter reward.
      * @param int $userid Parameter userid.
      * @return void Return value.
      */
-    public function deliver(\stdClass $purchase, \stdClass $reward, int $userid): void {
-        throw new \moodle_exception('manualdelivery', 'local_rewardshop');
+    public function deliver(stdClass $purchase, stdClass $reward, int $userid): void {
+        throw new moodle_exception('manualdelivery', 'local_rewardshop');
     }
 }

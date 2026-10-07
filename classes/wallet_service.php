@@ -24,7 +24,10 @@
 
 namespace local_rewardshop;
 
+use context_course;
 use core\lock\lock_config;
+use invalid_parameter_exception;
+use moodle_exception;
 
 /**
  * Class wallet_service.
@@ -59,18 +62,26 @@ class wallet_service {
      */
     public static function change(int $userid, int $courseid, int $amount, string $type, string $reference, string $description = '', ?int $relatedid = null, ?string $idempotencykey = null): int {
         global $DB;
-        if ($userid <= 0 || $courseid <= 0 || $amount === 0 || !in_array($type, self::TYPES, true)) throw new \invalid_parameter_exception('Invalid wallet change');
-        $ctx = \context_course::instance($courseid);
+        if ($userid <= 0 || $courseid <= 0 || $amount === 0 || !in_array($type, self::TYPES, true)) {
+            throw new invalid_parameter_exception('Invalid wallet change');
+        }
+        $ctx = context_course::instance($courseid);
         $key = $idempotencykey ?: implode('|', [$userid, $courseid, $type, $reference, (string)$relatedid, $amount]);
         $hash = hash('sha256', $key);
         $existing = $DB->get_record('local_rewardshop_ledger', ['uniquehash' => $hash]);
-        if ($existing) return (int)$existing->balanceafter;
+        if ($existing) {
+            return (int)$existing->balanceafter;
+        }
         $factory = lock_config::get_lock_factory('local_rewardshop');
         $lock = $factory->get_lock('wallet:' . $userid . ':' . $courseid, 10);
-        if (!$lock) throw new \moodle_exception('locktimeout', 'local_rewardshop');
+        if (!$lock) {
+            throw new moodle_exception('locktimeout', 'local_rewardshop');
+        }
         try {
             $existing = $DB->get_record('local_rewardshop_ledger', ['uniquehash' => $hash]);
-            if ($existing) return (int)$existing->balanceafter;
+            if ($existing) {
+                return (int)$existing->balanceafter;
+            }
             $tx = $DB->start_delegated_transaction();
             $now = time();
             $wallet = $DB->get_record('local_rewardshop_wallet', ['userid' => $userid, 'courseid' => $courseid]);
@@ -79,16 +90,38 @@ class wallet_service {
                 $wallet->id = $DB->insert_record('local_rewardshop_wallet', $wallet);
             }
             $new = (int)$wallet->balance + $amount;
-            if ($new < 0) throw new \moodle_exception('insufficientcredits', 'local_rewardshop');
+            if ($new < 0) {
+                throw new moodle_exception('insufficientcredits', 'local_rewardshop');
+            }
             $wallet->balance = $new;
-            if ($amount > 0 && in_array($type, ['earn', 'refund'], true)) $wallet->lifetimeearned += $amount;
-            if ($amount < 0) $wallet->lifetimespent += abs($amount);
+            if ($amount > 0 && in_array($type, ['earn', 'refund'], true)) {
+                $wallet->lifetimeearned += $amount;
+            }
+            if ($amount < 0) {
+                $wallet->lifetimespent += abs($amount);
+            }
             $wallet->timemodified = $now;
             $DB->update_record('local_rewardshop_wallet', $wallet);
-            $ledger = (object)['userid' => $userid, 'courseid' => $courseid, 'amount' => $amount, 'type' => $type, 'reference' => substr($reference, 0, 100), 'relatedid' => $relatedid, 'balanceafter' => $new, 'description' => $description, 'uniquehash' => $hash, 'timecreated' => $now];
+            $ledger = (object)[
+                'userid' => $userid,
+                'courseid' => $courseid,
+                'amount' => $amount,
+                'type' => $type,
+                'reference' => substr($reference, 0, 100),
+                'relatedid' => $relatedid,
+                'balanceafter' => $new,
+                'description' => $description,
+                'uniquehash' => $hash,
+                'timecreated' => $now,
+            ];
             $ledgerid = $DB->insert_record('local_rewardshop_ledger', $ledger);
             $eventclass = $amount < 0 ? '\\local_rewardshop\\event\\credits_spent' : '\\local_rewardshop\\event\\credits_earned';
-            $eventclass::create(['context' => $ctx, 'objectid' => $ledgerid, 'relateduserid' => $userid, 'other' => ['amount' => $amount, 'balance' => $new, 'type' => $type]])->trigger();
+            $eventclass::create([
+                'context' => $ctx,
+                'objectid' => $ledgerid,
+                'relateduserid' => $userid,
+                'other' => ['amount' => $amount, 'balance' => $new, 'type' => $type],
+            ])->trigger();
             $tx->allow_commit();
             return $new;
         } finally {

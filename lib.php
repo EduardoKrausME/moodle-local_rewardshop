@@ -23,13 +23,39 @@
  */
 
 defined('MOODLE_INTERNAL') || die;
+/**
+ * local_rewardshop_extend_navigation_course
+ *
+ * @param $navigation
+ * @param $course
+ * @param $context
+ * @return void
+ * @throws \core\exception\moodle_exception
+ * @throws coding_exception
+ */
 function local_rewardshop_extend_navigation_course($navigation, $course, $context) {
     if (!isloggedin() || isguestuser() || !has_capability('local/rewardshop:view', $context)) {
         return;
     }
-    $navigation->add(get_string('pluginname', 'local_rewardshop'), new moodle_url('/local/rewardshop/index.php', ['courseid' => $course->id]), navigation_node::TYPE_CUSTOM, null, 'local_rewardshop');
+    $navigation->add(get_string('pluginname', 'local_rewardshop'),
+        new moodle_url('/local/rewardshop/index.php', ['courseid' => $course->id]), navigation_node::TYPE_CUSTOM, null, 'local_rewardshop');
 }
 
+/**
+ * local_rewardshop_pluginfile
+ *
+ * @param $course
+ * @param $cm
+ * @param $context
+ * @param $filearea
+ * @param $args
+ * @param $forcedownload
+ * @param array $options
+ * @return bool
+ * @throws coding_exception
+ * @throws moodle_exception
+ * @throws require_login_exception
+ */
 function local_rewardshop_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
     if ($context->contextlevel !== CONTEXT_COURSE || $filearea !== 'rewardimage') {
         return false;

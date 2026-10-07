@@ -23,10 +23,15 @@
  */
 
 namespace local_rewardshop\task;
+
+use context_course;
+use core\task\scheduled_task;
+use local_rewardshop\personalxp_bridge;
+
 /**
  * Class sync_personalxp.
  */
-class sync_personalxp extends \core\task\scheduled_task {
+class sync_personalxp extends scheduled_task {
     /**
      * Method get_name.
      *
@@ -43,14 +48,18 @@ class sync_personalxp extends \core\task\scheduled_task {
      */
     public function execute() {
         global $DB;
-        if (!class_exists('\\local_personalxp\\service\\xp_manager')) return;
+        if (!class_exists('\\local_personalxp\\service\\xp_manager')) {
+            return;
+        }
         $courses = $DB->get_fieldset_select('local_rewardshop_rewards', 'DISTINCT courseid', 'enabled=1');
         foreach ($courses as $courseid) {
-            $context = \context_course::instance((int)$courseid, IGNORE_MISSING);
-            if (!$context) continue;
+            $context = context_course::instance((int)$courseid, IGNORE_MISSING);
+            if (!$context) {
+                continue;
+            }
             $users = get_enrolled_users($context, 'local/rewardshop:view', 0, 'u.id');
             foreach ($users as $u) {
-                \local_rewardshop\personalxp_bridge::sync_user_course((int)$u->id, (int)$courseid);
+                personalxp_bridge::sync_user_course((int)$u->id, (int)$courseid);
             }
         }
     }

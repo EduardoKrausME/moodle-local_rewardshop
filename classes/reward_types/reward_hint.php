@@ -23,6 +23,9 @@
  */
 
 namespace local_rewardshop\reward_types;
+
+use stdClass;
+
 /**
  * Class reward_hint.
  */
@@ -49,11 +52,13 @@ class reward_hint extends base {
      * Method validate_configuration.
      *
      * @param array $config Parameter config.
-     * @param \stdClass $reward Parameter reward.
+     * @param stdClass $reward Parameter reward.
      * @return array Return value.
      */
-    public function validate_configuration(array $config, \stdClass $reward): array {
-        return trim((string)($config['hint'] ?? '')) === '' ? ['hint' => get_string('errorhint', 'local_rewardshop')] : [];
+    public function validate_configuration(array $config, stdClass $reward): array {
+        return trim((string)($config['hint'] ?? '')) === '' ? [
+            'hint' => get_string('errorhint', 'local_rewardshop'),
+        ] : [];
     }
 
     /**
@@ -68,11 +73,11 @@ class reward_hint extends base {
     /**
      * Method deliver.
      *
-     * @param \stdClass $purchase Parameter purchase.
-     * @param \stdClass $reward Parameter reward.
+     * @param stdClass $purchase Parameter purchase.
+     * @param stdClass $reward Parameter reward.
      * @param int $userid Parameter userid.
      * @return void Return value.
      */
-    public function deliver(\stdClass $purchase, \stdClass $reward, int $userid): void { /* Hint lives in immutable config snapshot and is shown in My purchases. */
+    public function deliver(stdClass $purchase, stdClass $reward, int $userid): void { /* Hint lives in immutable config snapshot and is shown in My purchases. */
     }
 }

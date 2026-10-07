@@ -23,16 +23,20 @@
  */
 
 namespace local_rewardshop;
+
+use advanced_testcase;
+use stdClass;
+
 /** @covers \local_rewardshop\purchase_service */
-final class purchase_test extends \advanced_testcase {
+final class purchase_test extends advanced_testcase {
     /**
      * Method reward.
      *
      * @param int $courseid Parameter courseid.
      * @param array $x Parameter x.
-     * @return \stdClass Return value.
+     * @return stdClass Return value.
      */
-    private function reward(int $courseid, array $x = []): \stdClass {
+    private function reward(int $courseid, array $x = []): stdClass {
         global $DB;
         $d = (object)array_merge(['courseid' => $courseid, 'name' => 'Hint', 'description' => '', 'descriptionformat' => FORMAT_HTML, 'rewardtype' => 'reward_hint', 'cost' => 50, 'stock' => null, 'maxperuser' => 1, 'enabled' => 1, 'timestart' => 0, 'timeend' => 0, 'requiresapproval' => 0, 'configjson' => json_encode(['hint' => 'Use the index.']), 'sortorder' => 1, 'timecreated' => time(), 'timemodified' => time()], $x);
         $d->id = $DB->insert_record('local_rewardshop_rewards', $d);
@@ -43,9 +47,9 @@ final class purchase_test extends \advanced_testcase {
      * Method setupuser.
      *
      * @param mixed $course Parameter course.
-     * @return \stdClass Return value.
+     * @return stdClass Return value.
      */
-    private function setupuser($course): \stdClass {
+    private function setupuser($course): stdClass {
         $u = $this->getDataGenerator()->create_user();
         $this->getDataGenerator()->enrol_user($u->id, $course->id, 'student');
         $this->setUser($u);

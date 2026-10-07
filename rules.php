@@ -22,6 +22,8 @@
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_rewardshop\form\rule_form;
+
 require_once(__DIR__ . '/../../config.php');
 $courseid = required_param('courseid', PARAM_INT);
 $course = get_course($courseid);
@@ -32,20 +34,36 @@ $PAGE->set_url('/local/rewardshop/rules.php', ['courseid' => $courseid]);
 $PAGE->set_context($context);
 $PAGE->set_title(get_string('creditrules', 'local_rewardshop'));
 $PAGE->set_heading($course->fullname);
-$form = new \local_rewardshop\form\rule_form();
+$form = new rule_form();
 $rule = $DB->get_record('local_rewardshop_rules', ['courseid' => $courseid]);
-if (!$rule) $rule = (object)['courseid' => $courseid, 'enabled' => 1, 'xpstep' => (int)(get_config('local_rewardshop', 'defaultxpstep') ?: 500), 'credits' => (int)(get_config('local_rewardshop', 'defaultcredits') ?: 50)];
+if (!$rule) {
+    $rule = (object)[
+        'courseid' => $courseid,
+        'enabled' => 1,
+        'xpstep' => (int)(get_config('local_rewardshop', 'defaultxpstep') ?: 500),
+        'credits' => (int)(get_config('local_rewardshop', 'defaultcredits') ?: 50),
+    ];
+}
 $form->set_data($rule);
-if ($form->is_cancelled()) redirect(new moodle_url('/local/rewardshop/manage.php', ['courseid' => $courseid]));
+if ($form->is_cancelled()) {
+    redirect(new moodle_url('/local/rewardshop/manage.php', ['courseid' => $courseid]));
+}
 if ($d = $form->get_data()) {
-    $rec = (object)['courseid' => $courseid, 'enabled' => (int)$d->enabled, 'xpstep' => (int)$d->xpstep, 'credits' => (int)$d->credits, 'timemodified' => time()];
+    $rec = (object)[
+        'courseid' => $courseid,
+        'enabled' => (int)$d->enabled,
+        'xpstep' => (int)$d->xpstep,
+        'credits' => (int)$d->credits,
+        'timemodified' => time(),
+    ];
     if ($rule->id ?? 0) {
         $rec->id = $rule->id;
         $DB->update_record('local_rewardshop_rules', $rec);
     } else {
         $DB->insert_record('local_rewardshop_rules', $rec);
     }
-    redirect(new moodle_url('/local/rewardshop/manage.php', ['courseid' => $courseid]), get_string('changessaved'));
+    redirect(new moodle_url('/local/rewardshop/manage.php',
+        ['courseid' => $courseid]), get_string('changessaved'));
 }
 echo $OUTPUT->header();
 $form->display();

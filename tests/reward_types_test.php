@@ -23,10 +23,13 @@
  */
 
 namespace local_rewardshop;
+
+use advanced_testcase;
+
 /**
  * Class reward_types_test.
  */
-final class reward_types_test extends \advanced_testcase {
+final class reward_types_test extends advanced_testcase {
     /**
      * Method test_quiz_attempt_never_claims_automatic_without_api.
      *

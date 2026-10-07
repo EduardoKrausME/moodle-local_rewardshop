@@ -23,10 +23,14 @@
  */
 
 namespace local_rewardshop\event;
+
+use core\event\base;
+use moodle_url;
+
 /**
  * Class reward_refunded.
  */
-class reward_refunded extends \core\event\base {
+class reward_refunded extends base {
     /**
      * Method init.
      *
@@ -62,6 +66,6 @@ class reward_refunded extends \core\event\base {
      * @return mixed Return value.
      */
     public function get_url() {
-        return new \moodle_url('/local/rewardshop/my.php', ['courseid' => $this->courseid]);
+        return new moodle_url('/local/rewardshop/my.php', ['courseid' => $this->courseid]);
     }
 }
