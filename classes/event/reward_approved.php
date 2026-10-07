@@ -40,6 +40,7 @@ class reward_approved extends base {
         $this->data['contextlevel'] = CONTEXT_COURSE;
         $this->data['crud'] = 'c';
         $this->data['edulevel'] = self::LEVEL_PARTICIPATING;
+        $this->data['objecttable'] = 'local_rewardshop_purchases';
     }
 
     /**

@@ -56,7 +56,7 @@ final class api_test extends advanced_testcase {
         $c = $this->getDataGenerator()->create_course();
         $u = $this->getDataGenerator()->create_user();
         $this->expectException(moodle_exception::class);
-        api::spend_credits($u->id, $c->id, 1, 'test', '', '', 'spend-no-balance');
+        api::spend_credits($u->id, $c->id, 1, 'test', '', null, 'spend-no-balance');
     }
 
     /**
@@ -68,9 +68,9 @@ final class api_test extends advanced_testcase {
         $this->resetAfterTest();
         $c = $this->getDataGenerator()->create_course();
         $u = $this->getDataGenerator()->create_user();
-        api::add_credits($u->id, $c->id, 50, 'earn', '', '', 'e');
-        api::spend_credits($u->id, $c->id, 30, 'spend', '', '', 's');
-        api::refund($u->id, $c->id, 30, 'refund', '', '', 'r');
+        api::add_credits($u->id, $c->id, 50, 'earn', '', null, 'e');
+        api::spend_credits($u->id, $c->id, 30, 'spend', '', null, 's');
+        api::refund($u->id, $c->id, 30, 'refund', '', null, 'r');
         global $DB;
         $this->assertSame(50, api::get_balance($u->id, $c->id));
         $this->assertCount(3, $DB->get_records('local_rewardshop_ledger', ['userid' => $u->id]));

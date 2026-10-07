@@ -40,6 +40,7 @@ class credits_earned extends base {
         $this->data['contextlevel'] = CONTEXT_COURSE;
         $this->data['crud'] = 'r';
         $this->data['edulevel'] = self::LEVEL_PARTICIPATING;
+        $this->data['objecttable'] = 'local_rewardshop_ledger';
     }
 
     /**
