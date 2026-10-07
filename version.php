@@ -23,7 +23,7 @@
  */
 
 defined('MOODLE_INTERNAL') || die;
-$plugin->release = '1.0.1';
+$plugin->release = '1.0.2';
 $plugin->version = 2026100300;
 $plugin->component = 'local_rewardshop';
 $plugin->requires = 2022112800; // Moodle 4.1.
