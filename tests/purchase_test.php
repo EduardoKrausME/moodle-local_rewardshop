@@ -27,7 +27,11 @@ namespace local_rewardshop;
 use advanced_testcase;
 use stdClass;
 
-/** @covers \local_rewardshop\purchase_service */
+/**
+ * Tests for purchase service.
+ *
+ * @covers \local_rewardshop\purchase_service
+ */
 final class purchase_test extends advanced_testcase {
     /**
      * Method reward.
