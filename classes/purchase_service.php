@@ -170,7 +170,7 @@ class purchase_service {
                 } finally {
                     $lock->release();
                 }
-        });
+            });
     }
 
     /**
@@ -237,7 +237,7 @@ class purchase_service {
                     }
                 }
                 $tx->allow_commit();
-        });
+            });
     }
 
     /**
@@ -328,6 +328,6 @@ class purchase_service {
                 $DB->update_record('local_rewardshop_purchases', $p);
                 reward_refunded::create(['context' => $ctx, 'objectid' => $p->id, 'relateduserid' => $p->userid])->trigger();
                 $tx->allow_commit();
-        });
+            });
     }
 }
