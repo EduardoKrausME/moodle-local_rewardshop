@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die;
 
 $plugin->version = 2026102300;
-$plugin->release = '1.0.6';
+$plugin->release = '1.0.7';
 $plugin->component = 'local_rewardshop';
 $plugin->requires = 2022112800;
 $plugin->maturity = MATURITY_STABLE;
