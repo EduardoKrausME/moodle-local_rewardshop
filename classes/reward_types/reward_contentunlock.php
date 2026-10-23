@@ -98,6 +98,19 @@ class reward_contentunlock extends base {
      * @param int $userid Parameter userid.
      * @return void Return value.
      */
+    public function cancel(stdClass $purchase, stdClass $reward, int $userid): void {
+        global $DB;
+        $DB->delete_records("local_rewardshop_unlocks", ["purchaseid" => $purchase->id,
+            "userid" => $userid, "courseid" => $reward->courseid]);
+    }
+
+    /**
+     * Deliver the entitlement for the purchased activity.
+     *
+     * @param stdClass $purchase The purchase.
+     * @param stdClass $reward The reward.
+     * @param int $userid Recipient user.
+     */
     public function deliver(stdClass $purchase, stdClass $reward, int $userid): void {
         global $DB;
         $c = $this->config($reward);

@@ -112,8 +112,11 @@ class purchase_service {
         $reward = $DB->get_record('local_rewardshop_rewards', ['id' => $rewardid], '*', MUST_EXIST);
         $context = context_course::instance($reward->courseid);
         require_capability('local/rewardshop:view', $context);
-        $factory = lock_config::get_lock_factory('local_rewardshop');
-        $lock = $factory->get_lock('reward:' . $rewardid, 10);
+        return wallet_service::with_wallet_lock($userid, (int)$reward->courseid,
+            function () use ($rewardid, $userid, $requesttoken, $reward, $context): stdClass {
+        global $DB;
+        $factory = lock_config::get_lock_factory("local_rewardshop");
+        $lock = $factory->get_lock("reward:" . $rewardid, 10);
         if (!$lock) {
             throw new moodle_exception('locktimeout', 'local_rewardshop');
         }
@@ -159,7 +162,7 @@ class purchase_service {
                     'cost' => $p->cost],
             ])->trigger();
             if ($status === 'approved' && $type->supports_automatic_delivery()) {
-                self::deliver($p->id, 0);
+                self::deliver_internal($p->id, 0, true);
                 $p = $DB->get_record('local_rewardshop_purchases', ['id' => $p->id]);
             }
             $tx->allow_commit();
@@ -167,6 +170,7 @@ class purchase_service {
         } finally {
             $lock->release();
         }
+        });
     }
 
     /**
@@ -207,6 +211,13 @@ class purchase_service {
         if ($p->status !== 'pending') {
             throw new moodle_exception('invalidstatus', 'local_rewardshop');
         }
+        wallet_service::with_wallet_lock((int)$p->userid, (int)$p->courseid,
+            function () use ($purchaseid, $actorid, $approve, $ctx): void {
+        global $DB;
+        $p = $DB->get_record("local_rewardshop_purchases", ["id" => $purchaseid], "*", MUST_EXIST);
+        if ($p->status !== "pending") {
+            throw new moodle_exception("invalidstatus", "local_rewardshop");
+        }
         $tx = $DB->start_delegated_transaction();
         $p->status = $approve ? 'approved' : 'rejected';
         $p->approvedby = $actorid;
@@ -222,10 +233,11 @@ class purchase_service {
         if ($approve) {
             $reward = $DB->get_record('local_rewardshop_rewards', ['id' => $p->rewardid], '*', MUST_EXIST);
             if (reward_type_registry::get($reward->rewardtype)->supports_automatic_delivery()) {
-                self::deliver($p->id, $actorid);
+                self::deliver_internal($p->id, $actorid, true);
             }
         }
         $tx->allow_commit();
+        });
     }
 
     /**
@@ -236,17 +248,41 @@ class purchase_service {
      * @return void Return value.
      */
     public static function deliver(int $purchaseid, int $actorid): void {
-        global $DB;
-        $p = $DB->get_record('local_rewardshop_purchases', ['id' => $purchaseid], '*', MUST_EXIST);
-        if (!in_array($p->status, ['approved', 'pending'], true)) {
+        self::deliver_internal($purchaseid, $actorid, false);
+    }
+
+    /**
+     * Deliver an approved purchase, bypassing actor checks only for an internal automatic delivery.
+     *
+     * @param int $purchaseid Purchase ID.
+     * @param int $actorid Actor ID.
+     * @param bool $automatic Whether invoked by the trusted purchase lifecycle.
+     */
+    private static function deliver_internal(int $purchaseid, int $actorid, bool $automatic): void {
+        global $DB, $USER;
+        $p = $DB->get_record("local_rewardshop_purchases", ["id" => $purchaseid], "*", MUST_EXIST);
+        $ctx = context_course::instance((int)$p->courseid);
+        if (!$automatic) {
+            if ($actorid <= 0 || (int)$USER->id !== $actorid) {
+                throw new moodle_exception("nopermissions", "error", "", "deliver");
+            }
+            require_capability("local/rewardshop:approve", $ctx);
+        }
+        if ($p->status !== "approved") {
             if ($p->status === 'delivered') {
                 return;
             }
             throw new moodle_exception('invalidstatus', 'local_rewardshop');
         }
         $reward = $DB->get_record('local_rewardshop_rewards', ['id' => $p->rewardid], '*', MUST_EXIST);
+        if ((int)$reward->courseid !== (int)$p->courseid) {
+            throw new moodle_exception("invalidtarget", "local_rewardshop");
+        }
         $type = reward_type_registry::get($reward->rewardtype);
-        $type->deliver($p, $reward, $p->userid);
+        // Manual rewards are fulfilled by staff before confirming delivery in the shop.
+        if ($type->supports_automatic_delivery()) {
+            $type->deliver($p, $reward, $p->userid);
+        }
         $p->status = 'delivered';
         $p->timemodified = time();
         $DB->update_record('local_rewardshop_purchases', $p);
@@ -274,6 +310,14 @@ class purchase_service {
             throw new moodle_exception('invalidstatus', 'local_rewardshop');
         }
         $reward = $DB->get_record('local_rewardshop_rewards', ['id' => $p->rewardid], '*', MUST_EXIST);
+        wallet_service::with_wallet_lock((int)$p->userid, (int)$p->courseid,
+            function () use ($purchaseid, $ctx, $reason): void {
+        global $DB;
+        $p = $DB->get_record("local_rewardshop_purchases", ["id" => $purchaseid], "*", MUST_EXIST);
+        if (in_array($p->status, ["refunded", "rejected", "cancelled"], true)) {
+            throw new moodle_exception("invalidstatus", "local_rewardshop");
+        }
+        $reward = $DB->get_record("local_rewardshop_rewards", ["id" => $p->rewardid], "*", MUST_EXIST);
         $tx = $DB->start_delegated_transaction();
         if ($p->cost > 0) {
             api::refund($p->userid, $p->courseid, $p->cost, 'refund', $reason, $p->id, 'refund:' . $p->id);
@@ -284,5 +328,6 @@ class purchase_service {
         $DB->update_record('local_rewardshop_purchases', $p);
         reward_refunded::create(['context' => $ctx, 'objectid' => $p->id, 'relateduserid' => $p->userid])->trigger();
         $tx->allow_commit();
+        });
     }
 }

@@ -68,7 +68,7 @@ class reward_badge extends base {
      * @return bool Return value.
      */
     public function supports_automatic_delivery(): bool {
-        return function_exists('badge_award');
+        return class_exists("\\core_badges\\badge");
     }
 
     /**
@@ -82,11 +82,18 @@ class reward_badge extends base {
     public function deliver(stdClass $purchase, stdClass $reward, int $userid): void {
         $config = $this->config($reward);
         $badgeid = (int)($config['badgeid'] ?? 0);
-        if (!$badgeid || !function_exists('badge_award')) {
-            throw new moodle_exception('deliverynotsupported', 'local_rewardshop');
+        global $DB, $CFG;
+        require_once($CFG->libdir . "/badgeslib.php");
+        if (!$badgeid || !class_exists("\\core_badges\\badge")) {
+            throw new moodle_exception("deliverynotsupported", "local_rewardshop");
         }
-        global $CFG;
-        require_once($CFG->libdir . '/badgeslib.php');
-        badge_award($badgeid, $userid);
+        $record = $DB->get_record("badge", ["id" => $badgeid], "*", MUST_EXIST);
+        if ((int)$record->type !== BADGE_TYPE_COURSE || (int)$record->courseid !== (int)$reward->courseid ||
+                !in_array((int)$record->status, [BADGE_STATUS_ACTIVE, BADGE_STATUS_ACTIVE_LOCKED], true)) {
+            throw new moodle_exception("invalidtarget", "local_rewardshop");
+        }
+        if (!$DB->record_exists("badge_issued", ["badgeid" => $badgeid, "userid" => $userid])) {
+            (new \\core_badges\\badge($badgeid))->issue($userid);
+        }
     }
 }

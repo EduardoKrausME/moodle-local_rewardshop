@@ -38,6 +38,7 @@ $action = optional_param('action', '', PARAM_ALPHA);
 if ($action) {
     require_sesskey();
     $id = required_param('id', PARAM_INT);
+    $DB->get_record("local_rewardshop_purchases", ["id" => $id, "courseid" => $courseid], "id", MUST_EXIST);
     if ($action === 'approve') {
         purchase_service::approve($id, $USER->id);
     } else {
@@ -55,15 +56,19 @@ if ($action) {
     }
     redirect($PAGE->url);
 }
+$page = max(0, optional_param("page", 0, PARAM_INT));
+$perpage = 30;
+$total = $DB->count_records("local_rewardshop_purchases", ["courseid" => $courseid]);
 $sql = "
-    SELECT p.*,r.name
+    SELECT p.*, r.name, u.firstname, u.lastname, u.firstnamephonetic,
+           u.lastnamephonetic, u.middlename, u.alternatename
       FROM {local_rewardshop_purchases} p
-      JOIN {local_rewardshop_rewards}   r ON r.id=p.rewardid
-     WHERE p.courseid=:c
-  ORDER BY p.timecreated DESC";
+      JOIN {local_rewardshop_rewards} r ON r.id = p.rewardid
+      JOIN {user} u ON u.id = p.userid
+     WHERE p.courseid = :c
+  ORDER BY p.timecreated DESC, p.id DESC";
 $rows = [];
-foreach ($DB->get_records_sql($sql, ['c' => $courseid]) as $p) {
-    $u = core_user::get_user($p->userid, 'id,firstname,lastname');
+foreach ($DB->get_records_sql($sql, ["c" => $courseid], $page * $perpage, $perpage) as $p) {
     $base = [
         'courseid' => $courseid,
         'id' => $p->id,
@@ -71,7 +76,7 @@ foreach ($DB->get_records_sql($sql, ['c' => $courseid]) as $p) {
     ];
     $rows[] = [
         'id' => $p->id,
-        'user' => fullname($u),
+        'user' => fullname($p),
         'reward' => format_string($p->name),
         'cost' => $p->cost,
         'status' => get_string('status_' . $p->status, 'local_rewardshop'),
@@ -88,6 +93,7 @@ foreach ($DB->get_records_sql($sql, ['c' => $courseid]) as $p) {
 echo $OUTPUT->header();
 echo $OUTPUT->render_from_template('local_rewardshop/purchases', [
     'rows' => $rows,
+    'pagingbar' => $OUTPUT->paging_bar($total, $page, $perpage, $PAGE->url),
     'manageurl' => new moodle_url('/local/rewardshop/manage.php', ['courseid' => $courseid]),
 ]);
 echo $OUTPUT->footer();

@@ -67,8 +67,8 @@ class reward_quizattempt extends base {
      */
     public function supports_automatic_delivery(): bool {
         // Cross-version rule: automatic delivery is enabled only when a supported override service is available.
-        return class_exists('\\mod_quiz\\local\\override_manager') &&
-            method_exists('\\mod_quiz\\local\\override_manager', 'save_user_override');
+        // A generic cross-version extra-attempt API is not available. Staff must apply the override manually.
+        return false;
     }
 
     /**
@@ -80,19 +80,6 @@ class reward_quizattempt extends base {
      * @return void Return value.
      */
     public function deliver(stdClass $purchase, stdClass $reward, int $userid): void {
-        if (!$this->supports_automatic_delivery()) {
-            throw new moodle_exception('quizattemptmanual', 'local_rewardshop');
-        }
-        $c = $this->config($reward);
-        $cm = get_coursemodule_from_id('quiz', (int)$c['cmid'], $reward->courseid, false, MUST_EXIST);
-        $manager = '\\mod_quiz\\local\\override_manager';
-        if (!method_exists($manager, 'save_user_override')) {
-            throw new moodle_exception('quizattemptmanual', 'local_rewardshop');
-        }
-        // Deliberately delegated to Moodle API; no direct writes to quiz_overrides.
-        $manager::save_user_override((int)$cm->instance, $userid, [
-            'attemptsdelta' => 1,
-            'reason' => 'local_rewardshop purchase #' . $purchase->id,
-        ]);
+        throw new moodle_exception("quizattemptmanual", "local_rewardshop");
     }
 }

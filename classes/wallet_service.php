@@ -36,6 +36,37 @@ class wallet_service {
     /** @var string[] */
     private const TYPES = ['earn', 'spend', 'refund', 'adjustment'];
 
+    /** @var array<string, bool> Wallet locks held by this PHP request. */
+    private static array $heldlocks = [];
+
+    /**
+     * Hold the wallet lock for the entire operation, including the final database commit.
+     * Nested wallet writes in the same request reuse the lock instead of deadlocking.
+     *
+     * @param int $userid Wallet owner.
+     * @param int $courseid Course.
+     * @param callable $callback Operation to execute while locked.
+     * @return mixed Callback result.
+     */
+    public static function with_wallet_lock(int $userid, int $courseid, callable $callback) {
+        $key = "wallet:{$userid}:{$courseid}";
+        if (isset(self::$heldlocks[$key])) {
+            return $callback();
+        }
+        $factory = lock_config::get_lock_factory("local_rewardshop");
+        $lock = $factory->get_lock($key, 10);
+        if (!$lock) {
+            throw new moodle_exception("locktimeout", "local_rewardshop");
+        }
+        self::$heldlocks[$key] = true;
+        try {
+            return $callback();
+        } finally {
+            unset(self::$heldlocks[$key]);
+            $lock->release();
+        }
+    }
+
     /**
      * Method get_balance.
      *
@@ -75,12 +106,9 @@ class wallet_service {
         if ($existing) {
             return (int)$existing->balanceafter;
         }
-        $factory = lock_config::get_lock_factory('local_rewardshop');
-        $lock = $factory->get_lock('wallet:' . $userid . ':' . $courseid, 10);
-        if (!$lock) {
-            throw new moodle_exception('locktimeout', 'local_rewardshop');
-        }
-        try {
+        return self::with_wallet_lock($userid, $courseid, function () use (
+            $userid, $courseid, $amount, $type, $reference, $description, $relatedid, $hash, $ctx
+        ): int { global $DB;
             $existing = $DB->get_record('local_rewardshop_ledger', ['uniquehash' => $hash]);
             if ($existing) {
                 return (int)$existing->balanceafter;
@@ -134,8 +162,6 @@ class wallet_service {
             ])->trigger();
             $tx->allow_commit();
             return $new;
-        } finally {
-            $lock->release();
-        }
+        });
     }
 }
