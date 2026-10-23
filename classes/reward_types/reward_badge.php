@@ -93,7 +93,7 @@ class reward_badge extends base {
             throw new moodle_exception("invalidtarget", "local_rewardshop");
         }
         if (!$DB->record_exists("badge_issued", ["badgeid" => $badgeid, "userid" => $userid])) {
-            (new \\core_badges\\badge($badgeid))->issue($userid);
+            (new \core_badges\badge($badgeid))->issue($userid);
         }
     }
 }

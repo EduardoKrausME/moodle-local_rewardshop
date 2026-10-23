@@ -114,62 +114,62 @@ class purchase_service {
         require_capability('local/rewardshop:view', $context);
         return wallet_service::with_wallet_lock($userid, (int)$reward->courseid,
             function () use ($rewardid, $userid, $requesttoken, $reward, $context): stdClass {
-        global $DB;
-        $factory = lock_config::get_lock_factory("local_rewardshop");
-        $lock = $factory->get_lock("reward:" . $rewardid, 10);
-        if (!$lock) {
-            throw new moodle_exception('locktimeout', 'local_rewardshop');
-        }
-        try {
-            $existing = $DB->get_record('local_rewardshop_purchases', ['userid' => $userid, 'requesttoken' => $requesttoken]);
-            if ($existing) {
-                return $existing;
-            }
-            $check = self::can_purchase($rewardid, $userid);
-            if (!$check['allowed']) {
-                throw new moodle_exception('cannotpurchase', 'local_rewardshop', '', implode('; ', $check['errors']));
-            }
-            $tx = $DB->start_delegated_transaction();
-            $status = $reward->requiresapproval ? 'pending' : 'approved';
-            $now = time();
-            $p = (object)[
-                'rewardid' => $rewardid,
-                'userid' => $userid,
-                'courseid' => $reward->courseid,
-                'cost' => (int)$reward->cost,
-                'status' => $status,
-                'requesttoken' => $requesttoken,
-                'configsnapshot' => json_encode(['rewardtype' => $reward->rewardtype,
-                    'name' => $reward->name,
-                    'config' => json_decode((string)$reward->configjson, true)], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-                'approvedby' => null,
-                'timeapproved' => $status === 'approved' ? $now : null,
-                'timecreated' => $now,
-                'timemodified' => $now,
-            ];
-            $p->id = $DB->insert_record('local_rewardshop_purchases', $p);
-            if ($p->cost > 0) {
-                api::spend_credits($userid, $reward->courseid, $p->cost, 'purchase',
-                    get_string('ledgerpurchase', 'local_rewardshop', $reward->name), $p->id, 'purchase:' . $p->id);
-            }
-            $type = reward_type_registry::get($reward->rewardtype);
-            $type->purchase($p, $reward, $userid);
-            reward_purchased::create([
-                'context' => $context,
-                'objectid' => $p->id,
-                'relateduserid' => $userid,
-                'other' => ['rewardid' => $rewardid,
-                    'cost' => $p->cost],
-            ])->trigger();
-            if ($status === 'approved' && $type->supports_automatic_delivery()) {
-                self::deliver_internal($p->id, 0, true);
-                $p = $DB->get_record('local_rewardshop_purchases', ['id' => $p->id]);
-            }
-            $tx->allow_commit();
-            return $p;
-        } finally {
-            $lock->release();
-        }
+                global $DB;
+                $factory = lock_config::get_lock_factory("local_rewardshop");
+                $lock = $factory->get_lock("reward:" . $rewardid, 10);
+                if (!$lock) {
+                    throw new moodle_exception('locktimeout', 'local_rewardshop');
+                }
+                try {
+                    $existing = $DB->get_record('local_rewardshop_purchases', ['userid' => $userid, 'requesttoken' => $requesttoken]);
+                    if ($existing) {
+                        return $existing;
+                    }
+                    $check = self::can_purchase($rewardid, $userid);
+                    if (!$check['allowed']) {
+                        throw new moodle_exception('cannotpurchase', 'local_rewardshop', '', implode('; ', $check['errors']));
+                    }
+                    $tx = $DB->start_delegated_transaction();
+                    $status = $reward->requiresapproval ? 'pending' : 'approved';
+                    $now = time();
+                    $p = (object)[
+                        'rewardid' => $rewardid,
+                        'userid' => $userid,
+                        'courseid' => $reward->courseid,
+                        'cost' => (int)$reward->cost,
+                        'status' => $status,
+                        'requesttoken' => $requesttoken,
+                        'configsnapshot' => json_encode(['rewardtype' => $reward->rewardtype,
+                            'name' => $reward->name,
+                            'config' => json_decode((string)$reward->configjson, true)], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                        'approvedby' => null,
+                        'timeapproved' => $status === 'approved' ? $now : null,
+                        'timecreated' => $now,
+                        'timemodified' => $now,
+                    ];
+                    $p->id = $DB->insert_record('local_rewardshop_purchases', $p);
+                    if ($p->cost > 0) {
+                        api::spend_credits($userid, $reward->courseid, $p->cost, 'purchase',
+                            get_string('ledgerpurchase', 'local_rewardshop', $reward->name), $p->id, 'purchase:' . $p->id);
+                    }
+                    $type = reward_type_registry::get($reward->rewardtype);
+                    $type->purchase($p, $reward, $userid);
+                    reward_purchased::create([
+                        'context' => $context,
+                        'objectid' => $p->id,
+                        'relateduserid' => $userid,
+                        'other' => ['rewardid' => $rewardid,
+                            'cost' => $p->cost],
+                    ])->trigger();
+                    if ($status === 'approved' && $type->supports_automatic_delivery()) {
+                        self::deliver_internal($p->id, 0, true);
+                        $p = $DB->get_record('local_rewardshop_purchases', ['id' => $p->id]);
+                    }
+                    $tx->allow_commit();
+                    return $p;
+                } finally {
+                    $lock->release();
+                }
         });
     }
 
@@ -213,30 +213,30 @@ class purchase_service {
         }
         wallet_service::with_wallet_lock((int)$p->userid, (int)$p->courseid,
             function () use ($purchaseid, $actorid, $approve, $ctx): void {
-        global $DB;
-        $p = $DB->get_record("local_rewardshop_purchases", ["id" => $purchaseid], "*", MUST_EXIST);
-        if ($p->status !== "pending") {
-            throw new moodle_exception("invalidstatus", "local_rewardshop");
-        }
-        $tx = $DB->start_delegated_transaction();
-        $p->status = $approve ? 'approved' : 'rejected';
-        $p->approvedby = $actorid;
-        $p->timeapproved = time();
-        $p->timemodified = time();
-        $DB->update_record('local_rewardshop_purchases', $p);
-        if (!$approve && $p->cost > 0) {
-            api::refund($p->userid, $p->courseid, $p->cost, 'rejection',
-                get_string('ledgerrejection', 'local_rewardshop'), $p->id, 'reject:' . $p->id);
-        }
-        $event = $approve ? '\\local_rewardshop\\event\\reward_approved' : '\\local_rewardshop\\event\\reward_rejected';
-        $event::create(['context' => $ctx, 'objectid' => $p->id, 'relateduserid' => $p->userid])->trigger();
-        if ($approve) {
-            $reward = $DB->get_record('local_rewardshop_rewards', ['id' => $p->rewardid], '*', MUST_EXIST);
-            if (reward_type_registry::get($reward->rewardtype)->supports_automatic_delivery()) {
-                self::deliver_internal($p->id, $actorid, true);
-            }
-        }
-        $tx->allow_commit();
+                global $DB;
+                $p = $DB->get_record("local_rewardshop_purchases", ["id" => $purchaseid], "*", MUST_EXIST);
+                if ($p->status !== "pending") {
+                    throw new moodle_exception("invalidstatus", "local_rewardshop");
+                }
+                $tx = $DB->start_delegated_transaction();
+                $p->status = $approve ? 'approved' : 'rejected';
+                $p->approvedby = $actorid;
+                $p->timeapproved = time();
+                $p->timemodified = time();
+                $DB->update_record('local_rewardshop_purchases', $p);
+                if (!$approve && $p->cost > 0) {
+                    api::refund($p->userid, $p->courseid, $p->cost, 'rejection',
+                        get_string('ledgerrejection', 'local_rewardshop'), $p->id, 'reject:' . $p->id);
+                }
+                $event = $approve ? '\\local_rewardshop\\event\\reward_approved' : '\\local_rewardshop\\event\\reward_rejected';
+                $event::create(['context' => $ctx, 'objectid' => $p->id, 'relateduserid' => $p->userid])->trigger();
+                if ($approve) {
+                    $reward = $DB->get_record('local_rewardshop_rewards', ['id' => $p->rewardid], '*', MUST_EXIST);
+                    if (reward_type_registry::get($reward->rewardtype)->supports_automatic_delivery()) {
+                        self::deliver_internal($p->id, $actorid, true);
+                    }
+                }
+                $tx->allow_commit();
         });
     }
 
@@ -312,22 +312,22 @@ class purchase_service {
         $reward = $DB->get_record('local_rewardshop_rewards', ['id' => $p->rewardid], '*', MUST_EXIST);
         wallet_service::with_wallet_lock((int)$p->userid, (int)$p->courseid,
             function () use ($purchaseid, $ctx, $reason): void {
-        global $DB;
-        $p = $DB->get_record("local_rewardshop_purchases", ["id" => $purchaseid], "*", MUST_EXIST);
-        if (in_array($p->status, ["refunded", "rejected", "cancelled"], true)) {
-            throw new moodle_exception("invalidstatus", "local_rewardshop");
-        }
-        $reward = $DB->get_record("local_rewardshop_rewards", ["id" => $p->rewardid], "*", MUST_EXIST);
-        $tx = $DB->start_delegated_transaction();
-        if ($p->cost > 0) {
-            api::refund($p->userid, $p->courseid, $p->cost, 'refund', $reason, $p->id, 'refund:' . $p->id);
-        }
-        reward_type_registry::get($reward->rewardtype)->cancel($p, $reward, $p->userid);
-        $p->status = 'refunded';
-        $p->timemodified = time();
-        $DB->update_record('local_rewardshop_purchases', $p);
-        reward_refunded::create(['context' => $ctx, 'objectid' => $p->id, 'relateduserid' => $p->userid])->trigger();
-        $tx->allow_commit();
+                global $DB;
+                $p = $DB->get_record("local_rewardshop_purchases", ["id" => $purchaseid], "*", MUST_EXIST);
+                if (in_array($p->status, ["refunded", "rejected", "cancelled"], true)) {
+                    throw new moodle_exception("invalidstatus", "local_rewardshop");
+                }
+                $reward = $DB->get_record("local_rewardshop_rewards", ["id" => $p->rewardid], "*", MUST_EXIST);
+                $tx = $DB->start_delegated_transaction();
+                if ($p->cost > 0) {
+                    api::refund($p->userid, $p->courseid, $p->cost, 'refund', $reason, $p->id, 'refund:' . $p->id);
+                }
+                reward_type_registry::get($reward->rewardtype)->cancel($p, $reward, $p->userid);
+                $p->status = 'refunded';
+                $p->timemodified = time();
+                $DB->update_record('local_rewardshop_purchases', $p);
+                reward_refunded::create(['context' => $ctx, 'objectid' => $p->id, 'relateduserid' => $p->userid])->trigger();
+                $tx->allow_commit();
         });
     }
 }
