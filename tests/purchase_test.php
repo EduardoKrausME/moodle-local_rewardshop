@@ -142,4 +142,78 @@ final class purchase_test extends advanced_testcase {
         purchase_service::reject($p->id, $teacher->id);
         $this->assertSame(500, api::get_balance($u->id, $c->id));
     }
+    /**
+     * Manual reward confirmation must work without calling a deliberately unsupported delivery API.
+     */
+    public function test_manual_delivery_confirmation(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course();
+        $student = $this->setupuser($course);
+        $reward = $this->reward($course->id, ["rewardtype" => "reward_custom", "configjson" => "{}"]);
+        $purchase = purchase_service::purchase($reward->id, $student->id, "manualdeliver123");
+        $teacher = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($teacher->id, $course->id, "editingteacher");
+        $this->setUser($teacher);
+        purchase_service::deliver($purchase->id, $teacher->id);
+        $this->assertSame("delivered", $DB->get_field("local_rewardshop_purchases", "status",
+            ["id" => $purchase->id]));
+    }
+
+    /**
+     * A teacher must never mark another course's rewards as delivered.
+     */
+    public function test_delivery_rejects_other_course(): void {
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course();
+        $othercourse = $this->getDataGenerator()->create_course();
+        $student = $this->setupuser($othercourse);
+        $reward = $this->reward($othercourse->id, ["rewardtype" => "reward_custom", "configjson" => "{}"]);
+        $purchase = purchase_service::purchase($reward->id, $student->id, "othercourse12345");
+        $teacher = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($teacher->id, $course->id, "editingteacher");
+        $this->setUser($teacher);
+        $this->expectException(\required_capability_exception::class);
+        purchase_service::deliver($purchase->id, $teacher->id);
+    }
+
+    /**
+     * A pending purchase cannot bypass teacher approval through the delivery action.
+     */
+    public function test_pending_purchase_cannot_be_delivered(): void {
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course();
+        $student = $this->setupuser($course);
+        $reward = $this->reward($course->id, [
+            "rewardtype" => "reward_custom", "configjson" => "{}", "requiresapproval" => 1,
+        ]);
+        $purchase = purchase_service::purchase($reward->id, $student->id, "pendingdeliver12");
+        $teacher = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($teacher->id, $course->id, "editingteacher");
+        $this->setUser($teacher);
+        $this->expectException(\moodle_exception::class);
+        purchase_service::deliver($purchase->id, $teacher->id);
+    }
+
+    /**
+     * Refunding a content-unlock reward removes its active entitlement.
+     */
+    public function test_refund_revokes_content_unlock(): void {
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course();
+        $page = $this->getDataGenerator()->create_module("page", ["course" => $course->id]);
+        $student = $this->setupuser($course);
+        $reward = $this->reward($course->id, [
+            "rewardtype" => "reward_contentunlock",
+            "configjson" => json_encode(["cmid" => $page->cmid]),
+        ]);
+        $purchase = purchase_service::purchase($reward->id, $student->id, "refundunlock1234");
+        $this->assertTrue(api::has_content_unlock($student->id, $page->cmid));
+        $teacher = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($teacher->id, $course->id, "editingteacher");
+        $this->setUser($teacher);
+        purchase_service::refund_purchase($purchase->id, $teacher->id, "Refund test");
+        $this->assertFalse(api::has_content_unlock($student->id, $page->cmid));
+    }
+
 }

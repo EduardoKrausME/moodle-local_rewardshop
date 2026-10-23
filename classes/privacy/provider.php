@@ -52,6 +52,7 @@ class provider implements \core_privacy\local\metadata\provider,
                 'balance' => 'privacy:balance',
                 'lifetimeearned' => 'privacy:lifetimeearned',
                 'lifetimespent' => 'privacy:lifetimespent',
+                'xpconverted' => 'privacy:xpconverted',
             ], 'privacy:wallet');
         $c->add_database_table('local_rewardshop_ledger',
             [

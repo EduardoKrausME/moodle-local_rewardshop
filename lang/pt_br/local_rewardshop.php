@@ -23,6 +23,7 @@
  */
 
 defined('MOODLE_INTERNAL') || die;
+$string['privacy:xpconverted'] = 'XP já convertido em créditos na carteira do aluno';
 $string['privacy:approvedby'] = 'Professor que aprovou ou rejeitou a compra';
 $string['privacy:unlocks'] = 'Conteúdos do curso desbloqueados';
 $string['privacy:purchaseid'] = 'Compra correspondente';
