@@ -61,10 +61,10 @@ class personalxp_bridge {
                     // One-time migration for wallets credited by the old per-milestone ledger algorithm.
                     $converted = self::legacy_converted_xp($userid, $courseid);
                 }
-                $before = intdiv($converted, $step);
-                $after = intdiv($xp, $step);
-                $earned = max(0, $after - $before) * $credits;
-                $checkpoint = $earned > 0 ? $after * $step : $converted;
+                // Compare unconverted XP, not absolute milestone numbers: those change with the rule.
+                $steps = intdiv(max(0, $xp - $converted), $step);
+                $earned = $steps * $credits;
+                $checkpoint = $converted + ($steps * $step);
                 if ($earned > 0) {
                     $reference = "personalxp:{$checkpoint}";
                     api::add_credits($userid, $courseid, $earned, $reference,
