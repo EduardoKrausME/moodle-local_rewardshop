@@ -121,7 +121,8 @@ class purchase_service {
                     throw new moodle_exception('locktimeout', 'local_rewardshop');
                 }
                 try {
-                    $existing = $DB->get_record('local_rewardshop_purchases', ['userid' => $userid, 'requesttoken' => $requesttoken]);
+                    $existing = $DB->get_record("local_rewardshop_purchases",
+                        ["userid" => $userid, "requesttoken" => $requesttoken]);
                     if ($existing) {
                         return $existing;
                     }
@@ -141,7 +142,8 @@ class purchase_service {
                         'requesttoken' => $requesttoken,
                         'configsnapshot' => json_encode(['rewardtype' => $reward->rewardtype,
                             'name' => $reward->name,
-                            'config' => json_decode((string)$reward->configjson, true)], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                            'config' => json_decode((string)$reward->configjson, true)],
+                            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
                         'approvedby' => null,
                         'timeapproved' => $status === 'approved' ? $now : null,
                         'timecreated' => $now,
