@@ -23,6 +23,15 @@
  */
 
 defined('MOODLE_INTERNAL') || die;
+$string['adjustcredits'] = 'Ajustar créditos';
+$string['adjustuserid'] = 'ID do usuário';
+$string['adjustamount'] = 'Ajuste de créditos (positivo ou negativo)';
+$string['adjustreason'] = 'Motivo do ajuste';
+$string['adjustsuccess'] = 'Ajuste de créditos registrado.';
+$string['adjustinvalidreason'] = 'Informe o motivo do ajuste.';
+$string['adjustinvaliduser'] = 'Selecione um usuário matriculado e ativo.';
+$string['adjustinvalidamount'] = 'Informe um ajuste diferente de zero.';
+$string['adjustinvalidtoken'] = 'Solicitação de ajuste inválida.';
 $string['amount'] = 'Valor';
 $string['approvalrequired'] = 'Depende de aprovação';
 $string['approve'] = 'Aprovar';

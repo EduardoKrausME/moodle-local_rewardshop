@@ -106,5 +106,7 @@ echo $OUTPUT->render_from_template('local_rewardshop/manage',
         'newurl' => new moodle_url('/local/rewardshop/edit.php', ['courseid' => $courseid]),
         'purchasesurl' => new moodle_url('/local/rewardshop/purchases.php', ['courseid' => $courseid]),
         'rulesurl' => new moodle_url('/local/rewardshop/rules.php', ['courseid' => $courseid]),
+        'canadjust' => has_capability("local/rewardshop:adjustcredits", $context),
+        'adjusturl' => new moodle_url('/local/rewardshop/adjust.php', ['courseid' => $courseid]),
     ]);
 echo $OUTPUT->footer();
