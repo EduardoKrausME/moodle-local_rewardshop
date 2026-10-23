@@ -28,12 +28,16 @@ use context;
 use core_privacy\local\metadata\collection;
 use core_privacy\local\request\approved_contextlist;
 use core_privacy\local\request\contextlist;
+use core_privacy\local\request\approved_userlist;
+use core_privacy\local\request\userlist;
 use core_privacy\local\request\writer;
 
 /**
  * Class provider.
  */
-class provider implements \core_privacy\local\metadata\provider, \core_privacy\local\request\plugin\provider {
+class provider implements \core_privacy\local\metadata\provider,
+        \core_privacy\local\request\plugin\provider,
+        \core_privacy\local\request\core_userlist_provider {
     /**
      * Method get_metadata.
      *
@@ -62,7 +66,15 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
                 'courseid' => 'privacy:courseid',
                 'status' => 'privacy:status',
                 'configsnapshot' => 'privacy:configsnapshot',
+                'approvedby' => 'privacy:approvedby',
             ], 'privacy:purchases');
+        $c->add_database_table("local_rewardshop_unlocks", [
+            "userid" => "privacy:userid",
+            "courseid" => "privacy:courseid",
+            "purchaseid" => "privacy:purchaseid",
+            "cmid" => "privacy:cmid",
+            "timeexpires" => "privacy:timeexpires",
+        ], "privacy:unlocks");
         return $c;
     }
 
@@ -73,19 +85,46 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
      * @return contextlist Return value.
      */
     public static function get_contexts_for_userid(int $userid): contextlist {
-        $l = new contextlist();
+        $list = new contextlist();
         $sql = "
-            SELECT DISTINCT ctx.id
+            SELECT ctx.id
               FROM {context} ctx
-              JOIN {course} c ON ctx.instanceid=c.id
-         LEFT JOIN {local_rewardshop_wallet} w ON w.courseid=c.id
-                                              AND w.userid=:u1
-         LEFT JOIN {local_rewardshop_purchases} p ON p.courseid=c.id
-                                                 AND p.userid=:u2
-             WHERE ctx.contextlevel=:level
-               AND (w.id IS NOT NULL OR p.id IS NOT NULL)";
-        $l->add_from_sql($sql, ['u1' => $userid, 'u2' => $userid, 'level' => CONTEXT_COURSE]);
-        return $l;
+             WHERE ctx.contextlevel = :level
+               AND (
+                    EXISTS (SELECT 1 FROM {local_rewardshop_wallet} w
+                            WHERE w.courseid = ctx.instanceid AND w.userid = :u1)
+                 OR EXISTS (SELECT 1 FROM {local_rewardshop_ledger} l
+                            WHERE l.courseid = ctx.instanceid AND l.userid = :u2)
+                 OR EXISTS (SELECT 1 FROM {local_rewardshop_purchases} p
+                            WHERE p.courseid = ctx.instanceid AND (p.userid = :u3 OR p.approvedby = :u4))
+                 OR EXISTS (SELECT 1 FROM {local_rewardshop_unlocks} t
+                            WHERE t.courseid = ctx.instanceid AND t.userid = :u5)
+               )";
+        $list->add_from_sql($sql, [
+            "level" => CONTEXT_COURSE, "u1" => $userid, "u2" => $userid,
+            "u3" => $userid, "u4" => $userid, "u5" => $userid,
+        ]);
+        return $list;
+    }
+
+    /**
+     * Report users with data in a particular course, including approving teachers.
+     *
+     * @param userlist $userlist Users to populate.
+     */
+    public static function get_users_in_context(userlist $userlist): void {
+        $ctx = $userlist->get_context();
+        if ($ctx->contextlevel !== CONTEXT_COURSE) {
+            return;
+        }
+        foreach (["local_rewardshop_wallet", "local_rewardshop_ledger",
+                "local_rewardshop_purchases", "local_rewardshop_unlocks"] as $table) {
+            $userlist->add_from_sql("SELECT userid FROM {" . $table . "} WHERE courseid = :courseid",
+                ["courseid" => $ctx->instanceid], "userid");
+        }
+        $userlist->add_from_sql("SELECT approvedby AS userid FROM {local_rewardshop_purchases}
+                WHERE courseid = :courseid AND approvedby IS NOT NULL",
+            ["courseid" => $ctx->instanceid], "userid");
     }
 
     /**
@@ -106,6 +145,11 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
                     ['userid' => $u, 'courseid' => $c], 'timecreated ASC')),
                 'purchases' => array_values($DB->get_records('local_rewardshop_purchases',
                     ['userid' => $u, 'courseid' => $c], 'timecreated ASC')),
+                'unlocks' => array_values($DB->get_records('local_rewardshop_unlocks',
+                    ['userid' => $u, 'courseid' => $c], 'timecreated ASC')),
+                'approvals' => array_values($DB->get_records('local_rewardshop_purchases',
+                    ['approvedby' => $u, 'courseid' => $c], 'timeapproved ASC',
+                    'id,courseid,approvedby,timeapproved')),
             ];
             writer::with_context($ctx)->export_data([get_string('pluginname', 'local_rewardshop')], (object)$data);
         }
@@ -137,15 +181,43 @@ class provider implements \core_privacy\local\metadata\provider, \core_privacy\l
      * @return void Return value.
      */
     public static function delete_data_for_user(approved_contextlist $contexts): void {
-        global $DB;
-        $u = $contexts->get_user()->id;
+        $userid = (int)$contexts->get_user()->id;
         foreach ($contexts->get_contexts() as $ctx) {
-            $c = $ctx->instanceid;
-
-            $ts = ['local_rewardshop_unlocks', 'local_rewardshop_purchases', 'local_rewardshop_ledger', 'local_rewardshop_wallet'];
-            foreach ($ts as $t) {
-                $DB->delete_records($t, ['courseid' => $c, 'userid' => $u]);
+            if ($ctx->contextlevel === CONTEXT_COURSE) {
+                self::delete_user_course($userid, (int)$ctx->instanceid);
             }
+        }
+    }
+
+    /**
+     * Delete data for an approved collection of users in a course.
+     *
+     * @param approved_userlist $userlist Approved users.
+     */
+    public static function delete_data_for_users(approved_userlist $userlist): void {
+        $ctx = $userlist->get_context();
+        if ($ctx->contextlevel !== CONTEXT_COURSE) {
+            return;
+        }
+        foreach ($userlist->get_userids() as $userid) {
+            self::delete_user_course((int)$userid, (int)$ctx->instanceid);
+        }
+    }
+
+    /**
+     * Remove user-owned records and anonymise this user's approval of other users' purchases.
+     *
+     * @param int $userid User to erase.
+     * @param int $courseid Course scope.
+     */
+    private static function delete_user_course(int $userid, int $courseid): void {
+        global $DB;
+        $DB->execute("UPDATE {local_rewardshop_purchases} SET approvedby = NULL
+                       WHERE courseid = :courseid AND approvedby = :userid",
+            ["courseid" => $courseid, "userid" => $userid]);
+        foreach (["local_rewardshop_unlocks", "local_rewardshop_purchases",
+                "local_rewardshop_ledger", "local_rewardshop_wallet"] as $table) {
+            $DB->delete_records($table, ["courseid" => $courseid, "userid" => $userid]);
         }
     }
 }

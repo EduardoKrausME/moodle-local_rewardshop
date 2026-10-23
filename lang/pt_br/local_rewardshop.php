@@ -23,6 +23,11 @@
  */
 
 defined('MOODLE_INTERNAL') || die;
+$string['privacy:approvedby'] = 'Professor que aprovou ou rejeitou a compra';
+$string['privacy:unlocks'] = 'Conteúdos do curso desbloqueados';
+$string['privacy:purchaseid'] = 'Compra correspondente';
+$string['privacy:cmid'] = 'ID do módulo do curso';
+$string['privacy:timeexpires'] = 'Prazo de expiração do desbloqueio';
 $string['adjustcredits'] = 'Ajustar créditos';
 $string['adjustuserid'] = 'ID do usuário';
 $string['adjustamount'] = 'Ajuste de créditos (positivo ou negativo)';
