@@ -29,4 +29,6 @@ $plugin->release = '1.0.8';
 $plugin->component = 'local_rewardshop';
 $plugin->requires = 2022112800;
 $plugin->maturity = MATURITY_STABLE;
-$plugin->dependencies = ['local_personalxp' => ANY_VERSION];
+$plugin->dependencies = [
+  'local_personalxp' => ANY_VERSION,
+];
