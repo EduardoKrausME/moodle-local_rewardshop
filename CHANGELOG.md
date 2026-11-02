@@ -2,6 +2,13 @@
 
 This changelog records **only the two latest published GitHub releases** of `local_rewardshop`. Each entry documents verified differences between its release tag and the immediately preceding **published** release tag. Commits made after `1.0.7` are excluded.
 
+## 1.0.8 - 2026-10-26
+
+- Regenerated the shop AMD source map and updated release metadata.
+- Added historical release documentation; no new runtime feature was identified in the published-tag diff.
+
+**Full comparison:** [1.0.7...1.0.8](https://github.com/EduardoKrausME/moodle-local_rewardshop/compare/1.0.7...1.0.8)
+
 ## [1.0.7] - 2026-10-23
 
 Published: 2026-10-23 22:52:00 UTC.
